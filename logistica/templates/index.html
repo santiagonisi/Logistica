@@ -18,7 +18,10 @@
     <!-- Barra de navegación simple -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
-            <a class="navbar-brand" href="{{ url_for('main.index') }}">LOGÍSTICA</a>
+            <a class="navbar-brand d-flex align-items-center" href="{{ url_for('main.index') }}">
+                <img src="{{ url_for('static', filename='isologo IARSA.png') }}" alt="Logo" width="40" height="40" class="me-2">
+                LOGÍSTICA
+            </a>
             <div class="collapse navbar-collapse">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">

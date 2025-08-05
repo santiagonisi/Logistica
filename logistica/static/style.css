@@ -59,6 +59,18 @@ form input:focus, form select:focus {
     letter-spacing: 1px;
 }
 
+/* === Logo en la navbar === */
+.navbar-brand img {
+    width: 44px;
+    height: 44px;
+    object-fit: contain;
+    background: #fff;
+    border-radius: 8px;
+    padding: 2px;
+    margin-right: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+}
+
 /* === Badges === */
 .badge {
     font-size: 0.85rem;
