@@ -5,7 +5,7 @@
 <!-- Formulario -->
 <form method="POST" action="{{ url_for('main.agregar_vehiculo') }}" class="row g-3 mb-4">
     <div class="col-md-2">
-        <input type="text" name="dominio" class="form-control" placeholder="Dominio" required>
+        <input type="text" name="codigo" class="form-control" placeholder="Código" required>
     </div>
     <div class="col-md-2">
         <input type="text" name="marca" class="form-control" placeholder="Marca" required>
@@ -16,8 +16,8 @@
     <div class="col-md-2">
         <input type="text" name="tipo" class="form-control" placeholder="Tipo" required>
     </div>
-    <div class="col-md-1">
-        <input type="number" name="anio" class="form-control" placeholder="Año" required>
+    <div class="col-md-2">
+        <input type="text" name="dominio" class="form-control" placeholder="Dominio (Patente)" required>
     </div>
     <div class="col-md-2">
         <select name="estado" class="form-select" required>
@@ -25,8 +25,8 @@
             <option value="Inactivo">Inactivo</option>
         </select>
     </div>
-    <div class="col-md-1">
-        <button type="submit" class="btn btn-primary w-100">Agregar</button>
+    <div class="col-12">
+        <button type="submit" class="btn btn-primary btn-block btn-agregar-grande">Agregar</button>
     </div>
 </form>
 
@@ -35,11 +35,11 @@
     <thead class="table-light">
         <tr>
             <th>ID</th>
-            <th>Dominio</th>
+            <th>Código</th>
             <th>Marca</th>
             <th>Modelo</th>
             <th>Tipo</th>
-            <th>Año</th>
+            <th>Dominio</th>
             <th>Estado</th>
             <th>Eliminar</th>
         </tr>
@@ -48,11 +48,11 @@
         {% for v in vehiculos %}
         <tr>
             <td>{{ v.id }}</td>
-            <td>{{ v.dominio }}</td>
+            <td>{{ v.codigo }}</td>
             <td>{{ v.marca }}</td>
             <td>{{ v.modelo }}</td>
             <td>{{ v.tipo }}</td>
-            <td>{{ v.anio }}</td>
+            <td>{{ v.dominio }}</td>
             <td>
                 <span class="badge {% if v.estado == 'Activo' %}bg-success{% else %}bg-secondary{% endif %}">
                     {{ v.estado }}
