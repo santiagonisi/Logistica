@@ -52,6 +52,11 @@ h1, h2, h3 {
     margin-top: 0.5rem;
 }
 
+/* Cambia solo el color del texto del botón "Agregar" al pasar el mouse */
+.btn-agregar-grande:hover, .btn-agregar-grande:focus {
+    color: #000 !important;
+}
+
 /* === Formularios === */
 form input, form select {
     border-radius: 0.375rem;
