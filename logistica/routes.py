@@ -33,6 +33,18 @@ def eliminar_vehiculo(id):
     db.session.commit()
     return redirect(url_for('main.vehiculos'))
 
+@main.route('/vehiculos/editar/<int:id>', methods=['POST'])
+def editar_vehiculo(id):
+    vehiculo = Vehiculo.query.get_or_404(id)
+    vehiculo.codigo = request.form['codigo']
+    vehiculo.marca = request.form['marca']
+    vehiculo.modelo = request.form['modelo']
+    vehiculo.tipo = request.form['tipo']
+    vehiculo.dominio = request.form['dominio']
+    vehiculo.estado = request.form['estado']
+    db.session.commit()
+    return redirect(url_for('main.vehiculos'))
+
 @main.route('/rutas')
 def rutas():
     return render_template('rutas.html')

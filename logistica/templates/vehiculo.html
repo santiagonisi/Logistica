@@ -41,6 +41,7 @@
             <th>Tipo</th>
             <th>Dominio</th>
             <th>Estado</th>
+            <th>Editar</th>
             <th>Eliminar</th>
         </tr>
     </thead>
@@ -57,6 +58,58 @@
                 <span class="badge {% if v.estado == 'Activo' %}bg-success{% else %}bg-secondary{% endif %}">
                     {{ v.estado }}
                 </span>
+            </td>
+            <td>
+                <!-- Botón Editar que abre un modal -->
+                <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editarModal{{ v.id }}">
+                    <i class="bi bi-pencil"></i>
+                </button>
+                <!-- Modal Bootstrap para editar -->
+                <div class="modal fade" id="editarModal{{ v.id }}" tabindex="-1" aria-labelledby="editarModalLabel{{ v.id }}" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <form method="POST" action="{{ url_for('main.editar_vehiculo', id=v.id) }}">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="editarModalLabel{{ v.id }}">Editar Vehículo</h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                        </div>
+                        <div class="modal-body">
+                          <div class="mb-2">
+                            <label class="form-label">Código</label>
+                            <input type="text" name="codigo" class="form-control" value="{{ v.codigo }}" required>
+                          </div>
+                          <div class="mb-2">
+                            <label class="form-label">Marca</label>
+                            <input type="text" name="marca" class="form-control" value="{{ v.marca }}" required>
+                          </div>
+                          <div class="mb-2">
+                            <label class="form-label">Modelo</label>
+                            <input type="text" name="modelo" class="form-control" value="{{ v.modelo }}" required>
+                          </div>
+                          <div class="mb-2">
+                            <label class="form-label">Tipo</label>
+                            <input type="text" name="tipo" class="form-control" value="{{ v.tipo }}" required>
+                          </div>
+                          <div class="mb-2">
+                            <label class="form-label">Dominio</label>
+                            <input type="text" name="dominio" class="form-control" value="{{ v.dominio }}" required>
+                          </div>
+                          <div class="mb-2">
+                            <label class="form-label">Estado</label>
+                            <select name="estado" class="form-select" required>
+                                <option value="Activo" {% if v.estado == 'Activo' %}selected{% endif %}>Activo</option>
+                                <option value="Inactivo" {% if v.estado == 'Inactivo' %}selected{% endif %}>Inactivo</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                          <button type="submit" class="btn btn-warning">Guardar Cambios</button>
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+                </div>
             </td>
             <td>
                 <a href="{{ url_for('main.eliminar_vehiculo', id=v.id) }}" class="btn btn-danger btn-sm">
