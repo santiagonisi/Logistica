@@ -15,11 +15,11 @@ def vehiculos():
 @main.route('/vehiculos/agregar', methods=['POST'])
 def agregar_vehiculo():
     nuevo = Vehiculo(
-        dominio=request.form['dominio'],
+        codigo=request.form['codigo'],
         marca=request.form['marca'],
         modelo=request.form['modelo'],
         tipo=request.form['tipo'],
-        anio=int(request.form['anio']),
+        dominio=request.form['dominio'],
         estado=request.form['estado']
     )
     db.session.add(nuevo)
