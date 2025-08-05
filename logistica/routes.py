@@ -32,3 +32,7 @@ def eliminar_vehiculo(id):
     db.session.delete(vehiculo)
     db.session.commit()
     return redirect(url_for('main.vehiculos'))
+
+@main.route('/rutas')
+def rutas():
+    return render_template('rutas.html')
