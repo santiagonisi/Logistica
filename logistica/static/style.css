@@ -89,6 +89,21 @@ form input:focus, form select:focus {
     box-shadow: 0 2px 6px rgba(0,0,0,0.12);
 }
 
+/* === Hamburguesa del navbar del mismo tamaño que el logo === */
+.navbar-toggler {
+    height: 44px;
+    width: 44px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.navbar-toggler-icon {
+    width: 32px;
+    height: 32px;
+}
+
 /* === Badges === */
 .badge {
     font-size: 0.85rem;
