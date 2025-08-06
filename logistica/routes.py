@@ -15,11 +15,11 @@ def vehiculos():
 @main.route('/vehiculos/agregar', methods=['POST'])
 def agregar_vehiculo():
     nuevo = Vehiculo(
-        dominio=request.form['dominio'],
+        codigo=request.form['codigo'],
         marca=request.form['marca'],
         modelo=request.form['modelo'],
         tipo=request.form['tipo'],
-        anio=int(request.form['anio']),
+        dominio=request.form['dominio'],
         estado=request.form['estado']
     )
     db.session.add(nuevo)
@@ -32,3 +32,19 @@ def eliminar_vehiculo(id):
     db.session.delete(vehiculo)
     db.session.commit()
     return redirect(url_for('main.vehiculos'))
+
+@main.route('/vehiculos/editar/<int:id>', methods=['POST'])
+def editar_vehiculo(id):
+    vehiculo = Vehiculo.query.get_or_404(id)
+    vehiculo.codigo = request.form['codigo']
+    vehiculo.marca = request.form['marca']
+    vehiculo.modelo = request.form['modelo']
+    vehiculo.tipo = request.form['tipo']
+    vehiculo.dominio = request.form['dominio']
+    vehiculo.estado = request.form['estado']
+    db.session.commit()
+    return redirect(url_for('main.vehiculos'))
+
+@main.route('/rutas')
+def rutas():
+    return render_template('rutas.html')
