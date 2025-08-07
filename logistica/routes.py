@@ -49,6 +49,19 @@ def editar_vehiculo(id):
 def rutas():
     return render_template('rutas.html')
 
+@main.route('/clientes')
+def clientes():
+    lista = Cliente.query.filter_by(estado="Activo").all()
+    return render_template('clientes.html', clientes=lista)
+
+@main.route('/clientes/baja/<int:id>')
+def baja_cliente(id):
+    cliente = Cliente.query.get_or_404(id)
+    cliente.estado = "Inactivo"
+    db.session.commit()
+    return redirect(url_for('main.clientes'))
+
+
 @main.route('/clientes/agregar', methods=['POST'])
 def agregar_cliente():
     nuevo = Cliente(
