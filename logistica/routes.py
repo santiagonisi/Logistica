@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for
-from .models import db, Vehiculo
+from .models import db, Vehiculo, Cliente
 
 main = Blueprint('main', __name__)
 
@@ -48,3 +48,14 @@ def editar_vehiculo(id):
 @main.route('/rutas')
 def rutas():
     return render_template('rutas.html')
+
+@main.route('/clientes/agregar', methods=['POST'])
+def agregar_cliente():
+    nuevo = Cliente(
+        nombre=request.form['nombre'],
+        ubicacion=request.form['ubicacion'],
+        estado="Activo"
+    )
+    db.session.add(nuevo)
+    db.session.commit()
+    return redirect(url_for('main.clientes'))

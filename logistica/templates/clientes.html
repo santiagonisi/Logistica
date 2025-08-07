@@ -1,0 +1,43 @@
+{% extends "index.html" %}
+{% block content %}
+<h2 class="mb-4">Clientes Activos</h2>
+
+<!-- Formulario para agregar cliente -->
+<form method="POST" action="{{ url_for('main.agregar_cliente') }}" class="row g-3 mb-4">
+    <div class="col-md-5">
+        <input type="text" name="nombre" class="form-control" placeholder="Nombre de la Obra" required>
+    </div>
+    <div class="col-md-5">
+        <input type="text" name="ubicacion" class="form-control" placeholder="Ubicación" required>
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-primary btn-block btn-agregar-grande">Agregar</button>
+    </div>
+</form>
+
+<!-- Tabla de clientes -->
+<table class="table table-bordered table-hover align-middle">
+    <thead class="table-light">
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Ubicación</th>
+            <th>Dar de Baja</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for c in clientes %}
+        <tr>
+            <td>{{ c.id }}</td>
+            <td>{{ c.nombre }}</td>
+            <td>{{ c.ubicacion }}</td>
+            <td>
+                <a href="{{ url_for('main.baja_cliente', id=c.id) }}" class="btn btn-danger btn-sm">
+                    <i class="bi bi-x-circle"></i> Baja
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

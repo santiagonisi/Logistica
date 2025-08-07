@@ -13,3 +13,12 @@ class Vehiculo(db.Model):
 
     def __repr__(self):
         return f'<Vehiculo {self.codigo}>'
+
+class Cliente(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(100), nullable=False)
+    ubicacion = db.Column(db.String(100), nullable=False)  # Ej: "Córdoba, Argentina"
+    estado = db.Column(db.String(10), nullable=False, default="Activo")  # Activo/Inactivo
+
+    def __repr__(self):
+        return f'<Cliente {self.nombre}>'
