@@ -4,13 +4,16 @@
 
 <!-- Formulario para agregar cliente -->
 <form method="POST" action="{{ url_for('main.agregar_cliente') }}" class="row g-3 mb-4">
-    <div class="col-md-5">
+    <div class="col-md-4">
         <input type="text" name="nombre" class="form-control" placeholder="Nombre de la Obra" required>
     </div>
-    <div class="col-md-5">
+    <div class="col-md-4">
         <input type="text" name="ubicacion" class="form-control" placeholder="Ubicación" required>
     </div>
-    <div class="col-md-2">
+    <div class="col-md-4">
+        <input type="text" name="comitente" class="form-control" placeholder="Comitente" required>
+    </div>
+    <div class="col-12">
         <button type="submit" class="btn btn-primary btn-block btn-agregar-grande">Agregar</button>
     </div>
 </form>
@@ -22,6 +25,7 @@
             <th>ID</th>
             <th>Nombre</th>
             <th>Ubicación</th>
+            <th>Comitente</th>
             <th>Dar de Baja</th>
         </tr>
     </thead>
@@ -31,9 +35,10 @@
             <td>{{ c.id }}</td>
             <td>{{ c.nombre }}</td>
             <td>{{ c.ubicacion }}</td>
+            <td>{{ c.comitente }}</td>
             <td>
                 <a href="{{ url_for('main.baja_cliente', id=c.id) }}" class="btn btn-danger btn-sm">
-                    <i class="bi bi-x-circle"></i> Baja
+                    <i class="bi bi-trash"></i>
                 </a>
             </td>
         </tr>

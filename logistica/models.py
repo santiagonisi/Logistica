@@ -18,6 +18,7 @@ class Cliente(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100), nullable=False)
     ubicacion = db.Column(db.String(100), nullable=False)  # Ej: "Córdoba, Argentina"
+    comitente = db.Column(db.String(100), nullable=False)  # Nombre del comitente
     estado = db.Column(db.String(10), nullable=False, default="Activo")  # Activo/Inactivo
 
     def __repr__(self):

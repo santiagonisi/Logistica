@@ -67,6 +67,7 @@ def agregar_cliente():
     nuevo = Cliente(
         nombre=request.form['nombre'],
         ubicacion=request.form['ubicacion'],
+        comitente=request.form['comitente'],
         estado="Activo"
     )
     db.session.add(nuevo)
