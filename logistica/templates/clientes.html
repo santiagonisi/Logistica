@@ -1,4 +1,5 @@
 {% extends "index.html" %}
+
 {% block content %}
 <h2 class="mb-4">Clientes Activos</h2>
 
@@ -15,7 +16,7 @@
             <option value="">Seleccionar Comitente</option>
             <option value="DVBA">DVBA</option>
             <option value="DNV">DNV</option>
-            <option value="Municipalidad San Nicolas">Municipalidad San Nicolas </option>
+            <option value="Municipalidad San Nicolas">Municipalidad San Nicolas</option>
             <option value="Municipalidad Ramallo">Municipalidad Ramallo</option>
             <option value="Municipalidad San Pedro">Municipalidad San Pedro</option>
             <option value="Municipalidad Pergamino">Municipalidad Pergamino</option>
@@ -58,4 +59,27 @@
         {% endfor %}
     </tbody>
 </table>
+
+<!-- Paginación -->
+<nav aria-label="Page navigation example">
+  <ul class="pagination">
+    <li class="page-item {% if page == 1 %}disabled{% endif %}">
+      <a class="page-link" href="{{ url_for('main.clientes', page=page-1) }}" aria-label="Previous">
+        <span aria-hidden="true">&laquo;</span>
+      </a>
+    </li>
+
+    {% for p in range(1, total_pages + 1) %}
+      <li class="page-item {% if p == page %}active{% endif %}">
+        <a class="page-link" href="{{ url_for('main.clientes', page=p) }}">{{ p }}</a>
+      </li>
+    {% endfor %}
+
+    <li class="page-item {% if page == total_pages %}disabled{% endif %}">
+      <a class="page-link" href="{{ url_for('main.clientes', page=page+1) }}" aria-label="Next">
+        <span aria-hidden="true">&raquo;</span>
+      </a>
+    </li>
+  </ul>
+</nav>
 {% endblock %}

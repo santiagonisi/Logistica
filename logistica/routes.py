@@ -3,14 +3,34 @@ from .models import db, Vehiculo, Cliente
 
 main = Blueprint('main', __name__)
 
+# Función genérica para paginar consultas
+def paginar_query(query, page, per_page=10):
+    total = query.count()
+    total_pages = max((total + per_page - 1) // per_page, 1)  # mínimo 1 página
+    # Aseguramos que page esté en rango válido
+    if page < 1:
+        page = 1
+    elif page > total_pages:
+        page = total_pages
+    items = query.offset((page - 1) * per_page).limit(per_page).all()
+    return items, total, total_pages, page
+
+
 @main.route('/')
 def index():
     return render_template('index.html')
 
+
 @main.route('/vehiculos')
 def vehiculos():
-    lista = Vehiculo.query.all()
-    return render_template('vehiculo.html', vehiculos=lista)
+    page = request.args.get('page', 1, type=int)
+    query = Vehiculo.query.order_by(Vehiculo.id)
+    vehiculos, total, total_pages, page = paginar_query(query, page)
+    return render_template('vehiculo.html',
+                           vehiculos=vehiculos,
+                           page=page,
+                           total_pages=total_pages)
+
 
 @main.route('/vehiculos/agregar', methods=['POST'])
 def agregar_vehiculo():
@@ -26,12 +46,14 @@ def agregar_vehiculo():
     db.session.commit()
     return redirect(url_for('main.vehiculos'))
 
+
 @main.route('/vehiculos/eliminar/<int:id>')
 def eliminar_vehiculo(id):
     vehiculo = Vehiculo.query.get_or_404(id)
     db.session.delete(vehiculo)
     db.session.commit()
     return redirect(url_for('main.vehiculos'))
+
 
 @main.route('/vehiculos/editar/<int:id>', methods=['POST'])
 def editar_vehiculo(id):
@@ -45,14 +67,22 @@ def editar_vehiculo(id):
     db.session.commit()
     return redirect(url_for('main.vehiculos'))
 
+
 @main.route('/rutas')
 def rutas():
     return render_template('rutas.html')
 
+
 @main.route('/clientes')
 def clientes():
-    lista = Cliente.query.filter_by(estado="Activo").all()
-    return render_template('clientes.html', clientes=lista)
+    page = request.args.get('page', 1, type=int)
+    query = Cliente.query.filter_by(estado="Activo").order_by(Cliente.id)
+    clientes, total, total_pages, page = paginar_query(query, page)
+    return render_template('clientes.html',
+                           clientes=clientes,
+                           page=page,
+                           total_pages=total_pages)
+
 
 @main.route('/clientes/baja/<int:id>')
 def baja_cliente(id):
