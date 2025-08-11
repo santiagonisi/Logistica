@@ -3,7 +3,7 @@
 {% block content %}
 <h2 class="mb-4">Clientes Activos</h2>
 
-<!-- Formulario para agregar cliente -->
+<!-- Formulario -->
 <form method="POST" action="{{ url_for('main.agregar_cliente') }}" class="row g-3 mb-4">
     <div class="col-md-4">
         <input type="text" name="nombre" class="form-control" placeholder="Nombre de la Obra" required>
@@ -32,7 +32,7 @@
     </div>
 </form>
 
-<!-- Tabla de clientes -->
+<!-- Tabla -->
 <table class="table table-bordered table-hover align-middle">
     <thead class="table-light">
         <tr>
