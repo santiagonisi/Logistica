@@ -8,8 +8,8 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
     db.init_app(app)
 
-    from logistica.routes import main  # Importa el blueprint
-    app.register_blueprint(main)       # Registra el blueprint
+    from logistica.routes import main
+    app.register_blueprint(main)
 
     return app
 

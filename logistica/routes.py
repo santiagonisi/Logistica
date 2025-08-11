@@ -3,11 +3,10 @@ from .models import db, Vehiculo, Cliente
 
 main = Blueprint('main', __name__)
 
-# Función genérica para paginar consultas
 def paginar_query(query, page, per_page=10):
     total = query.count()
-    total_pages = max((total + per_page - 1) // per_page, 1)  # mínimo 1 página
-    # Aseguramos que page esté en rango válido
+    total_pages = max((total + per_page - 1) // per_page, 1)
+    
     if page < 1:
         page = 1
     elif page > total_pages:
