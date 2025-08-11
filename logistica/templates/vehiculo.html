@@ -60,11 +60,11 @@
                 </span>
             </td>
             <td>
-                <!-- Botón Editar que abre un modal -->
+                <!-- Modal -->
                 <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editarModal{{ v.id }}">
                     <i class="bi bi-pencil"></i>
                 </button>
-                <!-- Modal Bootstrap para editar -->
+                
                 <div class="modal fade" id="editarModal{{ v.id }}" tabindex="-1" aria-labelledby="editarModalLabel{{ v.id }}" aria-hidden="true">
                   <div class="modal-dialog">
                     <form method="POST" action="{{ url_for('main.editar_vehiculo', id=v.id) }}">
