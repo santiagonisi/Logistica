@@ -1,15 +1,12 @@
-/* === Tipografía y ajustes generales === */
 body {
     background-color: #f8f9fa;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* === Encabezados === */
 h1, h2, h3 {
     color: #e6c028;
 }
 
-/* === Tablas === */
 .table th, .table td {
     text-align: center;
     vertical-align: middle;
@@ -19,7 +16,6 @@ h1, h2, h3 {
     background-color: #e9ecef;
 }
 
-/* === Botones === */
 .btn {
     border-radius: 0.375rem;
     padding: 0.375rem 0.75rem;
@@ -52,12 +48,10 @@ h1, h2, h3 {
     margin-top: 0.5rem;
 }
 
-/* Cambia solo el color del texto del botón "Agregar" al pasar el mouse */
 .btn-agregar-grande:hover, .btn-agregar-grande:focus {
     color: #000 !important;
 }
 
-/* === Formularios === */
 form input, form select {
     border-radius: 0.375rem;
 }
@@ -67,7 +61,6 @@ form input:focus, form select:focus {
     box-shadow: 0 0 0 0.15rem #e6c028;
 }
 
-/* === Navbar === */
 .navbar {
     box-shadow: 0 4px 6px #e3c019;
 }
@@ -77,7 +70,6 @@ form input:focus, form select:focus {
     letter-spacing: 1px;
 }
 
-/* === Logo en la navbar === */
 .navbar-brand img {
     width: 44px;
     height: 44px;
@@ -89,7 +81,6 @@ form input:focus, form select:focus {
     box-shadow: 0 2px 6px rgba(0,0,0,0.12);
 }
 
-/* === Hamburguesa del navbar del mismo tamaño que el logo === */
 .navbar-toggler {
     height: 44px;
     width: 44px;
@@ -104,31 +95,26 @@ form input:focus, form select:focus {
     height: 32px;
 }
 
-/* === Badges === */
 .badge {
     font-size: 0.85rem;
     padding: 0.5em 0.75em;
     border-radius: 0.375rem;
 }
 
-/* === Paginación === */
 .pagination .page-item .page-link {
     border-radius: 0.375rem;
 }
 
-/* === Contenedor principal === */
 .container {
     max-width: 1200px;
 }
 
-/* === Estilo para tablas principales === */
 .table thead th {
     background-color: #dee2e6;
     font-weight: bold;
     color: #212529;
 }
 
-/* === Separadores de secciones === */
 .section-title {
     border-bottom: 2px solid #e6c028;
     padding-bottom: 0.25rem;
