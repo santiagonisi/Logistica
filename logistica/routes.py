@@ -17,7 +17,7 @@ def paginar_query(query, page, per_page=10):
     return items, total, total_pages, page
 
 
-# --- HOME: panel de Asignaciones ---
+
 @main.route('/')
 def index():
     clientes = Cliente.query.filter_by(estado="Activo").order_by(Cliente.nombre).all()
@@ -33,7 +33,7 @@ def index():
     )
 
 
-# --- Vehículos ---
+
 @main.route('/vehiculos')
 def vehiculos():
     page = request.args.get('page', 1, type=int)
@@ -78,7 +78,7 @@ def editar_vehiculo(id):
     return redirect(url_for('main.vehiculos'))
 
 
-# --- Clientes ---
+
 @main.route('/clientes')
 def clientes():
     page = request.args.get('page', 1, type=int)
@@ -109,7 +109,7 @@ def agregar_cliente():
     return redirect(url_for('main.clientes'))
 
 
-# --- Asignaciones CRUD ---
+
 @main.route('/asignaciones/agregar', methods=['POST'])
 def agregar_asignacion():
     try:

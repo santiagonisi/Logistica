@@ -3,7 +3,7 @@
 
 <h2 class="mb-4 section-title">Vehículos</h2>
 
-<!-- Formulario -->
+
 <form method="POST" action="{{ url_for('main.agregar_vehiculo') }}" class="row g-3 mb-4">
     <div class="col-md-2">
         <input type="text" name="codigo" class="form-control" placeholder="Código" required>
@@ -31,7 +31,7 @@
     </div>
 </form>
 
-<!-- Tabla -->
+
 <table class="table table-bordered table-hover align-middle">
     <thead class="table-light">
         <tr>
@@ -61,7 +61,7 @@
                 </span>
             </td>
             <td>
-                <!-- Modal -->
+                
                 <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editarModal{{ v.id }}">
                     <i class="bi bi-pencil"></i>
                 </button>
@@ -122,7 +122,7 @@
     </tbody>
 </table>
 
-<!-- Paginación -->
+
 <nav aria-label="Page navigation example">
   <ul class="pagination">
     <li class="page-item {% if page == 1 %}disabled{% endif %}">
