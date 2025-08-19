@@ -1,0 +1,185 @@
+{% extends "index.html" %}
+{% block content %}
+
+<h2 class="mb-4 section-title">Asignaciones</h2>
+
+<!-- Mensajes flash -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="mb-3">
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<!-- Alta de Asignación -->
+<form method="POST" action="{{ url_for('main.agregar_asignacion') }}" class="row g-3 mb-4">
+  <div class="col-md-3">
+    <label class="form-label">Obra</label>
+    <select name="cliente_id" class="form-select" required>
+      <option value="">Seleccionar Obra</option>
+      {% for c in clientes %}
+        <option value="{{ c.id }}">{{ c.nombre }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-2">
+    <label class="form-label">Vehículo</label>
+    <select name="vehiculo_id" class="form-select" required>
+      <option value="">Seleccionar Vehículo</option>
+      {% for v in vehiculos %}
+        <option value="{{ v.id }}">{{ v.codigo }} - {{ v.dominio }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-2">
+    <label class="form-label">Chofer</label>
+    <input type="text" name="chofer" class="form-control" placeholder="Chofer" required>
+  </div>
+  <div class="col-md-2">
+    <label class="form-label">Material</label>
+    <input type="text" name="material" class="form-control" placeholder="Material" required>
+  </div>
+  <div class="col-md-1">
+    <label class="form-label">Fecha</label>
+    <input type="date" name="fecha" class="form-control" required>
+  </div>
+  <div class="col-md-1">
+    <label class="form-label">Inicio</label>
+    <input type="time" name="hora_inicio" class="form-control" required>
+  </div>
+  <div class="col-md-1">
+    <label class="form-label">Fin</label>
+    <input type="time" name="hora_fin" class="form-control" required>
+  </div>
+  <div class="col-12 text-end">
+    <button type="submit" class="btn btn-primary">Agregar Asignación</button>
+  </div>
+</form>
+
+<div class="d-flex justify-content-between align-items-center mb-2">
+  <h5 class="m-0">Listado por Obra</h5>
+  <a href="{{ url_for('main.exportar_asignaciones') }}" class="btn btn-success">
+    <i class="bi bi-file-earmark-excel"></i> Exportar
+  </a>
+</div>
+
+<!-- Agrupado por obra usando groupby -->
+<div class="accordion" id="accordionObras">
+  {% for obra, items in asignaciones|groupby('cliente.nombre') %}
+  <div class="accordion-item">
+    <h2 class="accordion-header" id="heading-{{ loop.index }}">
+      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ loop.index }}" aria-expanded="false" aria-controls="collapse-{{ loop.index }}">
+        {{ obra }} <span class="badge bg-secondary ms-2">{{ items|length }}</span>
+      </button>
+    </h2>
+    <div id="collapse-{{ loop.index }}" class="accordion-collapse collapse" aria-labelledby="heading-{{ loop.index }}" data-bs-parent="#accordionObras">
+      <div class="accordion-body">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Vehículo</th>
+                <th>Chofer</th>
+                <th>Material</th>
+                <th>Inicio</th>
+                <th>Fin</th>
+                <th style="width: 140px;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for a in items %}
+              <tr>
+                <td>{{ a.fecha.strftime('%Y-%m-%d') }}</td>
+                <td>{{ a.vehiculo.codigo }} ({{ a.vehiculo.dominio }})</td>
+                <td>{{ a.chofer }}</td>
+                <td>{{ a.material }}</td>
+                <td>{{ a.hora_inicio.strftime('%H:%M') }}</td>
+                <td>{{ a.hora_fin.strftime('%H:%M') }}</td>
+                <td>
+                  <!-- Botón editar abre modal -->
+                  <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#modalEditar{{ a.id }}">
+                    <i class="bi bi-pencil-square"></i>
+                  </button>
+                  <a href="{{ url_for('main.eliminar_asignacion', id=a.id) }}" class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar asignación?');">
+                    <i class="bi bi-trash"></i>
+                  </a>
+                </td>
+              </tr>
+
+              <!-- Modal de Edición por fila -->
+              <div class="modal fade" id="modalEditar{{ a.id }}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title">Editar Asignación #{{ a.id }}</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form method="POST" action="{{ url_for('main.editar_asignacion', id=a.id) }}">
+                      <div class="modal-body">
+                        <div class="row g-3">
+                          <div class="col-md-4">
+                            <label class="form-label">Obra</label>
+                            <select name="cliente_id" class="form-select" required>
+                              {% for c in clientes %}
+                                <option value="{{ c.id }}" {% if c.id == a.cliente_id %}selected{% endif %}>{{ c.nombre }}</option>
+                              {% endfor %}
+                            </select>
+                          </div>
+                          <div class="col-md-3">
+                            <label class="form-label">Vehículo</label>
+                            <select name="vehiculo_id" class="form-select" required>
+                              {% for v in vehiculos %}
+                                <option value="{{ v.id }}" {% if v.id == a.vehiculo_id %}selected{% endif %}>{{ v.codigo }} - {{ v.dominio }}</option>
+                              {% endfor %}
+                            </select>
+                          </div>
+                          <div class="col-md-5">
+                            <label class="form-label">Chofer</label>
+                            <input type="text" name="chofer" class="form-control" value="{{ a.chofer }}" required>
+                          </div>
+                          <div class="col-md-6">
+                            <label class="form-label">Material</label>
+                            <input type="text" name="material" class="form-control" value="{{ a.material }}" required>
+                          </div>
+                          <div class="col-md-2">
+                            <label class="form-label">Fecha</label>
+                            <input type="date" name="fecha" class="form-control" value="{{ a.fecha.strftime('%Y-%m-%d') }}" required>
+                          </div>
+                          <div class="col-md-2">
+                            <label class="form-label">Inicio</label>
+                            <input type="time" name="hora_inicio" class="form-control" value="{{ a.hora_inicio.strftime('%H:%M') }}" required>
+                          </div>
+                          <div class="col-md-2">
+                            <label class="form-label">Fin</label>
+                            <input type="time" name="hora_fin" class="form-control" value="{{ a.hora_fin.strftime('%H:%M') }}" required>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% else %}
+    <div class="alert alert-info">No hay asignaciones cargadas.</div>
+  {% endfor %}
+</div>
+
+{% endblock %}

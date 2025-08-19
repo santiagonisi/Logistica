@@ -102,3 +102,57 @@ def agregar_cliente():
     db.session.add(nuevo)
     db.session.commit()
     return redirect(url_for('main.clientes'))
+
+
+@main.route('/asignaciones/agregar', methods=['POST'])
+def agregar_asignacion():
+    try:
+        nueva = Asignacion(
+            cliente_id=int(request.form['cliente_id']),
+            vehiculo_id=int(request.form['vehiculo_id']),
+            chofer=request.form['chofer'].strip(),
+            material=request.form['material'].strip(),
+            fecha=datetime.strptime(request.form['fecha'], "%Y-%m-%d").date(),
+            hora_inicio=datetime.strptime(request.form['hora_inicio'], "%H:%M").time(),
+            hora_fin=datetime.strptime(request.form['hora_fin'], "%H:%M").time(),
+        )
+        db.session.add(nueva)
+        db.session.commit()
+        flash('Asignación creada correctamente', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error al crear la asignación: {e}', 'danger')
+    return redirect(url_for('main.index'))
+
+
+@main.route('/asignaciones/editar/<int:id>', methods=['POST'])
+def editar_asignacion(id):
+    a = Asignacion.query.get_or_404(id)
+    try:
+        a.cliente_id = int(request.form['cliente_id'])
+        a.vehiculo_id = int(request.form['vehiculo_id'])
+        a.chofer = request.form['chofer'].strip()
+        a.material = request.form['material'].strip()
+        a.fecha = datetime.strptime(request.form['fecha'], "%Y-%m-%d").date()
+        a.hora_inicio = datetime.strptime(request.form['hora_inicio'], "%H:%M").time()
+        a.hora_fin = datetime.strptime(request.form['hora_fin'], "%H:%M").time()
+        db.session.commit()
+        flash('Asignación actualizada', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error al actualizar: {e}', 'danger')
+    return redirect(url_for('main.index')) 
+
+
+@main.route('/asignaciones/eliminar/<int:id>')
+def eliminar_asignacion(id):
+    a = Asignacion.query.get_or_404(id)
+    try:
+        db.session.delete(a)
+        db.session.commit()
+        flash('Asignación eliminada', 'warning')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'No se pudo eliminar: {e}', 'danger')
+    return redirect(url_for('main.index')) 
+
