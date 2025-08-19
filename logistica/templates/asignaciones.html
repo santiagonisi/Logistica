@@ -3,7 +3,7 @@
 
 <h2 class="mb-4 section-title">Asignaciones</h2>
 
-<!-- Mensajes flash -->
+
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
     <div class="mb-3">
@@ -17,7 +17,7 @@
   {% endif %}
 {% endwith %}
 
-<!-- Alta de Asignación -->
+<!-- Asignación -->
 <form method="POST" action="{{ url_for('main.agregar_asignacion') }}" class="row g-3 mb-4">
   <div class="col-md-3">
     <label class="form-label">Obra</label>
@@ -28,7 +28,7 @@
       {% endfor %}
     </select>
   </div>
-  <div class="col-md-2">
+  <div class="col-md-3">
     <label class="form-label">Vehículo</label>
     <select name="vehiculo_id" class="form-select" required>
       <option value="">Seleccionar Vehículo</option>
@@ -37,29 +37,30 @@
       {% endfor %}
     </select>
   </div>
-  <div class="col-md-2">
+  <div class="col-md-3">
     <label class="form-label">Chofer</label>
     <input type="text" name="chofer" class="form-control" placeholder="Chofer" required>
   </div>
-  <div class="col-md-2">
+  <div class="col-md-3">
     <label class="form-label">Material</label>
     <input type="text" name="material" class="form-control" placeholder="Material" required>
   </div>
-  <div class="col-md-1">
+  <div class="col-md-3">
     <label class="form-label">Fecha</label>
     <input type="date" name="fecha" class="form-control" required>
   </div>
-  <div class="col-md-1">
+  <div class="col-md-3">
     <label class="form-label">Inicio</label>
     <input type="time" name="hora_inicio" class="form-control" required>
   </div>
-  <div class="col-md-1">
+  <div class="col-md-3">
     <label class="form-label">Fin</label>
     <input type="time" name="hora_fin" class="form-control" required>
   </div>
-  <div class="col-12">
-    <button type="submit" class="btn btn-primary btn-block btn-agregar-grande">Agregar Asignación</button>
-  </div>
+  <div class="col-md-3 d-flex align-items-end">
+  <button type="submit" class="btn btn-primary btn-block btn-agregar-grande">Agregar Asignación</button>
+</div>
+
 </form>
 
 <div class="d-flex justify-content-between align-items-center mb-2">
@@ -69,7 +70,7 @@
   </a>
 </div>
 
-<!-- Agrupado por obra usando groupby -->
+
 <div class="accordion" id="accordionObras">
   {% for obra, items in asignaciones|groupby('cliente.nombre') %}
   <div class="accordion-item">
@@ -103,7 +104,7 @@
                 <td>{{ a.hora_inicio.strftime('%H:%M') }}</td>
                 <td>{{ a.hora_fin.strftime('%H:%M') }}</td>
                 <td>
-                  <!-- Botón editar abre modal -->
+                  
                   <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#modalEditar{{ a.id }}">
                     <i class="bi bi-pencil-square"></i>
                   </button>
@@ -113,7 +114,7 @@
                 </td>
               </tr>
 
-              <!-- Modal de Edición por fila -->
+              
               <div class="modal fade" id="modalEditar{{ a.id }}" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog modal-lg modal-dialog-centered">
                   <div class="modal-content">
