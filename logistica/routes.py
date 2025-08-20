@@ -17,7 +17,6 @@ def paginar_query(query, page, per_page=10):
     return items, total, total_pages, page
 
 
-
 @main.route('/')
 def index():
     clientes = Cliente.query.filter_by(estado="Activo").order_by(Cliente.nombre).all()
@@ -31,7 +30,6 @@ def index():
         vehiculos=vehiculos,
         asignaciones=asignaciones
     )
-
 
 
 @main.route('/vehiculos')
@@ -77,8 +75,6 @@ def editar_vehiculo(id):
     db.session.commit()
     return redirect(url_for('main.vehiculos'))
 
-
-
 @main.route('/clientes')
 def clientes():
     page = request.args.get('page', 1, type=int)
@@ -107,7 +103,6 @@ def agregar_cliente():
     db.session.add(nuevo)
     db.session.commit()
     return redirect(url_for('main.clientes'))
-
 
 
 @main.route('/asignaciones/agregar', methods=['POST'])
