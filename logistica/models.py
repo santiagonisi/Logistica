@@ -27,7 +27,7 @@ class Cliente(db.Model):
 class Asignacion(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     cliente_id = db.Column(db.Integer, db.ForeignKey('cliente.id'), nullable=False)
-    vehiculo_id = db.Column(db.Integer, db.ForeignKey('vehiculo.id'), nullable=False)
+    vehiculo_id = db.Column(db.Integer, db.ForeignKey('vehiculo.id'), nullable=True)
     equipo_id = db.Column(db.Integer, db.ForeignKey('vehiculo.id'), nullable=True)
     chofer = db.Column(db.String(100), nullable=False)
     material = db.Column(db.String(100), nullable=False)
