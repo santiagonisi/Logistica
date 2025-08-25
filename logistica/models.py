@@ -35,6 +35,10 @@ class Asignacion(db.Model):
     hora_inicio = db.Column(db.Time, nullable=False)
     hora_fin = db.Column(db.Time, nullable=False)
     observaciones = db.Column(db.Text, nullable=True)
+    vehiculo_tercero = db.Column(db.String(100), nullable=True)
+    equipo_tercero = db.Column(db.String(100), nullable=True)
+    empresa_tercero = db.Column(db.String(100), nullable=True)
+    es_tercero = db.Column(db.Boolean, default=False)
 
     cliente = db.relationship('Cliente', backref=db.backref('asignaciones', lazy=True))
     vehiculo = db.relationship('Vehiculo', foreign_keys=[vehiculo_id])

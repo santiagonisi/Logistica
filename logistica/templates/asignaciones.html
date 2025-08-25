@@ -3,7 +3,6 @@
 
 <h2 class="mb-4 section-title">Asignaciones</h2>
 
-
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
     <div class="mb-3">
@@ -16,7 +15,6 @@
     </div>
   {% endif %}
 {% endwith %}
-
 
 <form method="POST" action="{{ url_for('main.agregar_asignacion') }}" class="row g-3 mb-4">
   <div class="col-md-3">
@@ -66,11 +64,35 @@
     <label class="form-label">Fin</label>
     <input type="time" name="hora_fin" class="form-control" required>
   </div>
-    <div class="col-md-12 d-flex align-items-end">
+  <div class="col-md-3">
+    <label class="form-label">¿Vehículo/equipo de terceros?</label>
+    <input type="checkbox" name="es_tercero" id="es_tercero" onchange="toggleTerceroFields()">
+  </div>
+  <div id="terceroFields" class="row g-3" style="display:none;">
+    <div class="col-md-3">
+      <label class="form-label">Nombre de Empresa</label>
+      <input type="text" name="empresa_tercero" class="form-control" placeholder="Nombre de la empresa">
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Vehículo Tercero</label>
+      <input type="text" name="vehiculo_tercero" class="form-control" placeholder="Vehículo de tercero">
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Equipo Tercero</label>
+      <input type="text" name="equipo_tercero" class="form-control" placeholder="Equipo de tercero">
+    </div>
+  </div>
+  <script>
+    function toggleTerceroFields() {
+      const tercero = document.getElementById('es_tercero').checked;
+      document.getElementById('terceroFields').style.display = tercero ? 'flex' : 'none';
+      document.querySelector('[name="vehiculo_id"]').disabled = tercero;
+      document.querySelector('[name="equipo_id"]').disabled = tercero;
+    }
+  </script>
+  <div class="col-md-12 d-flex align-items-end">
     <button type="submit" class="btn btn-primary form-control">Agregar Asignación</button>
-</div>
-
-
+  </div>
 </form>
 
 <div class="d-flex justify-content-between align-items-center mb-2">
@@ -79,7 +101,6 @@
     <i class="bi bi-file-earmark-excel"></i> Exportar
   </a>
 </div>
-
 
 <div class="accordion" id="accordionObras">
   {% for obra, items in asignaciones|groupby('cliente.nombre') %}
@@ -98,6 +119,7 @@
                 <th>Fecha</th>
                 <th>Vehículo</th>
                 <th>Equipo</th>
+                <th>Empresa Terceros</th>
                 <th>Chofer</th>
                 <th>Material</th>
                 <th>Inicio</th>
@@ -109,13 +131,28 @@
             <tbody>
               {% for a in items %}
               <tr>
-                <td>{{ a.fecha.strftime('%Y-%m-%d') }}</td>
-                <td>{{ a.vehiculo.codigo }} ({{ a.vehiculo.dominio }})</td>
+                <td>{{ a.fecha.strftime('%d/%m/%Y') }}</td>
                 <td>
-                  {% if a.equipo %}
+                  {% if a.es_tercero %}
+                    {{ a.vehiculo_tercero or 'Vehículo de tercero' }}
+                  {% else %}
+                    {{ a.vehiculo.codigo }} ({{ a.vehiculo.dominio }})
+                  {% endif %}
+                </td>
+                <td>
+                  {% if a.es_tercero %}
+                    {{ a.equipo_tercero or 'Equipo de tercero' }}
+                  {% elif a.equipo %}
                     {{ a.equipo.codigo }} ({{ a.equipo.dominio }})
                   {% else %}
                     <span class="text-muted">Sin equipo</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if a.es_tercero %}
+                    {{ a.empresa_tercero or 'Sin empresa' }}
+                  {% else %}
+                    <span class="text-muted">Propio</span>
                   {% endif %}
                 </td>
                 <td>{{ a.chofer }}</td>
@@ -142,7 +179,7 @@
                 </td>
               </tr>
 
-              
+              <!-- Modal Observaciones -->
               <div class="modal fade" id="modalObservaciones{{ a.id }}" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered">
                   <div class="modal-content">
@@ -163,7 +200,7 @@
                 </div>
               </div>
 
-              
+              <!-- Modal Editar Asignación -->
               <div class="modal fade" id="modalEditar{{ a.id }}" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog modal-lg modal-dialog-centered">
                   <div class="modal-content">

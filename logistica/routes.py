@@ -107,23 +107,20 @@ def agregar_cliente():
 
 @main.route('/asignaciones/agregar', methods=['POST'])
 def agregar_asignacion():
-    cliente_id = request.form['cliente_id']
-    vehiculo_id = request.form['vehiculo_id']
-    equipo_id = request.form.get('equipo_id') or None
-    chofer = request.form['chofer']
-    material = request.form['material']
-    fecha = request.form['fecha']
-    hora_inicio = request.form['hora_inicio']
-    hora_fin = request.form['hora_fin']
+    es_tercero = bool(request.form.get('es_tercero'))
     nueva = Asignacion(
-        cliente_id=cliente_id,
-        vehiculo_id=vehiculo_id,
-        equipo_id=equipo_id if equipo_id else None,
-        chofer=chofer,
-        material=material,
-        fecha=datetime.strptime(fecha, '%Y-%m-%d'),
-        hora_inicio=datetime.strptime(hora_inicio, '%H:%M').time(),
-        hora_fin=datetime.strptime(hora_fin, '%H:%M').time()
+        cliente_id=request.form['cliente_id'],
+        vehiculo_id=None if es_tercero else request.form['vehiculo_id'],
+        equipo_id=None if es_tercero else request.form.get('equipo_id') or None,
+        vehiculo_tercero=request.form.get('vehiculo_tercero') if es_tercero else None,
+        equipo_tercero=request.form.get('equipo_tercero') if es_tercero else None,
+        empresa_tercero=request.form.get('empresa_tercero') if es_tercero else None,
+        es_tercero=es_tercero,
+        chofer=request.form['chofer'],
+        material=request.form['material'],
+        fecha=datetime.strptime(request.form['fecha'], '%Y-%m-%d'),
+        hora_inicio=datetime.strptime(request.form['hora_inicio'], '%H:%M').time(),
+        hora_fin=datetime.strptime(request.form['hora_fin'], '%H:%M').time()
     )
     db.session.add(nueva)
     db.session.commit()
