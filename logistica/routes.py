@@ -166,7 +166,6 @@ def exportar_asignaciones():
     wb = Workbook()
     ws = wb.active
     ws.title = "Asignaciones"
-    # Encabezados, incluye Observaciones
     ws.append([
         "ID", "Obra", "Vehículo", "Chofer", "Material", "Fecha",
         "Inicio", "Fin", "Observaciones"
