@@ -28,11 +28,14 @@ class Asignacion(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     cliente_id = db.Column(db.Integer, db.ForeignKey('cliente.id'), nullable=False)
     vehiculo_id = db.Column(db.Integer, db.ForeignKey('vehiculo.id'), nullable=False)
+    equipo_id = db.Column(db.Integer, db.ForeignKey('vehiculo.id'), nullable=True)  # Nuevo campo
     chofer = db.Column(db.String(100), nullable=False)
     material = db.Column(db.String(100), nullable=False)
     fecha = db.Column(db.Date, nullable=False)
     hora_inicio = db.Column(db.Time, nullable=False)
     hora_fin = db.Column(db.Time, nullable=False)
+    observaciones = db.Column(db.Text, nullable=True)
 
     cliente = db.relationship('Cliente', backref=db.backref('asignaciones', lazy=True))
-    vehiculo = db.relationship('Vehiculo', backref=db.backref('asignaciones', lazy=True))
+    vehiculo = db.relationship('Vehiculo', foreign_keys=[vehiculo_id])
+    equipo = db.relationship('Vehiculo', foreign_keys=[equipo_id])

@@ -33,7 +33,16 @@
     <select name="vehiculo_id" class="form-select" required>
       <option value="">Seleccionar Vehículo</option>
       {% for v in vehiculos %}
-        <option value="{{ v.id }}">{{ v.codigo }} - {{ v.dominio }}</option>
+        <option value="{{ v.id }}">{{ v.codigo }} ({{ v.dominio }})</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-3">
+    <label class="form-label">Equipo</label>
+    <select name="equipo_id" class="form-select">
+      <option value="">Sin equipo</option>
+      {% for v in vehiculos %}
+        <option value="{{ v.id }}">{{ v.codigo }} ({{ v.dominio }})</option>
       {% endfor %}
     </select>
   </div>
@@ -88,11 +97,13 @@
               <tr>
                 <th>Fecha</th>
                 <th>Vehículo</th>
+                <th>Equipo</th>
                 <th>Chofer</th>
                 <th>Material</th>
                 <th>Inicio</th>
                 <th>Fin</th>
-                <th style="width: 140px;">Acciones</th>
+                <th>Observaciones</th>
+                <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -100,20 +111,57 @@
               <tr>
                 <td>{{ a.fecha.strftime('%Y-%m-%d') }}</td>
                 <td>{{ a.vehiculo.codigo }} ({{ a.vehiculo.dominio }})</td>
+                <td>
+                  {% if a.equipo %}
+                    {{ a.equipo.codigo }} ({{ a.equipo.dominio }})
+                  {% else %}
+                    <span class="text-muted">Sin equipo</span>
+                  {% endif %}
+                </td>
                 <td>{{ a.chofer }}</td>
                 <td>{{ a.material }}</td>
                 <td>{{ a.hora_inicio.strftime('%H:%M') }}</td>
                 <td>{{ a.hora_fin.strftime('%H:%M') }}</td>
                 <td>
-                  
+                  {% if a.observaciones %}
+                    <span class="text-break">{{ a.observaciones }}</span>
+                  {% else %}
+                    <span class="text-muted">Sin observaciones</span>
+                  {% endif %}
+                </td>
+                <td>
                   <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#modalEditar{{ a.id }}">
                     <i class="bi bi-pencil-square"></i>
+                  </button>
+                  <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#modalObservaciones{{ a.id }}">
+                    <i class="bi bi-chat-dots"></i>
                   </button>
                   <a href="{{ url_for('main.eliminar_asignacion', id=a.id) }}" class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar asignación?');">
                     <i class="bi bi-trash"></i>
                   </a>
                 </td>
               </tr>
+
+              <!-- Modal Observaciones -->
+              <div class="modal fade" id="modalObservaciones{{ a.id }}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                  <div class="modal-content">
+                    <form method="POST" action="{{ url_for('main.editar_observaciones', id=a.id) }}">
+                      <div class="modal-header">
+                        <h5 class="modal-title">Observaciones Asignación #{{ a.id }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                      </div>
+                      <div class="modal-body">
+                        <textarea name="observaciones" class="form-control" rows="4" placeholder="Escribe las observaciones...">{{ a.observaciones }}</textarea>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-info">Guardar Observaciones</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
 
               
               <div class="modal fade" id="modalEditar{{ a.id }}" tabindex="-1" aria-hidden="true">
@@ -139,6 +187,15 @@
                             <select name="vehiculo_id" class="form-select" required>
                               {% for v in vehiculos %}
                                 <option value="{{ v.id }}" {% if v.id == a.vehiculo_id %}selected{% endif %}>{{ v.codigo }} - {{ v.dominio }}</option>
+                              {% endfor %}
+                            </select>
+                          </div>
+                          <div class="col-md-3">
+                            <label class="form-label">Equipo</label>
+                            <select name="equipo_id" class="form-select">
+                              <option value="">Sin equipo</option>
+                              {% for v in vehiculos %}
+                                <option value="{{ v.id }}" {% if v.id == a.equipo_id %}selected{% endif %}>{{ v.codigo }} ({{ v.dominio }})</option>
                               {% endfor %}
                             </select>
                           </div>

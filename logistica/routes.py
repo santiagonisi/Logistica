@@ -107,23 +107,28 @@ def agregar_cliente():
 
 @main.route('/asignaciones/agregar', methods=['POST'])
 def agregar_asignacion():
-    try:
-        nueva = Asignacion(
-            cliente_id=int(request.form['cliente_id']),
-            vehiculo_id=int(request.form['vehiculo_id']),
-            chofer=request.form['chofer'].strip(),
-            material=request.form['material'].strip(),
-            fecha=datetime.strptime(request.form['fecha'], "%Y-%m-%d").date(),
-            hora_inicio=datetime.strptime(request.form['hora_inicio'], "%H:%M").time(),
-            hora_fin=datetime.strptime(request.form['hora_fin'], "%H:%M").time(),
-        )
-        db.session.add(nueva)
-        db.session.commit()
-        flash('Asignación creada correctamente', 'success')
-    except Exception as e:
-        db.session.rollback()
-        flash(f'Error al crear la asignación: {e}', 'danger')
-    return redirect(url_for('main.index'))
+    cliente_id = request.form['cliente_id']
+    vehiculo_id = request.form['vehiculo_id']
+    equipo_id = request.form.get('equipo_id') or None
+    chofer = request.form['chofer']
+    material = request.form['material']
+    fecha = request.form['fecha']
+    hora_inicio = request.form['hora_inicio']
+    hora_fin = request.form['hora_fin']
+    nueva = Asignacion(
+        cliente_id=cliente_id,
+        vehiculo_id=vehiculo_id,
+        equipo_id=equipo_id if equipo_id else None,
+        chofer=chofer,
+        material=material,
+        fecha=datetime.strptime(fecha, '%Y-%m-%d'),
+        hora_inicio=datetime.strptime(hora_inicio, '%H:%M').time(),
+        hora_fin=datetime.strptime(hora_fin, '%H:%M').time()
+    )
+    db.session.add(nueva)
+    db.session.commit()
+    flash('Asignación agregada', 'success')
+    return redirect(url_for('main.asignaciones'))
 
 @main.route('/asignaciones/editar/<int:id>', methods=['POST'])
 def editar_asignacion(id):
@@ -157,34 +162,61 @@ def eliminar_asignacion(id):
 
 @main.route('/asignaciones/exportar')
 def exportar_asignaciones():
-    asignaciones = Asignacion.query.order_by(
-        Asignacion.cliente_id, Asignacion.fecha, Asignacion.hora_inicio
-    ).all()
-
+    asignaciones = Asignacion.query.order_by(Asignacion.fecha.desc()).all()
     wb = Workbook()
     ws = wb.active
     ws.title = "Asignaciones"
-    headers = ["Obra", "Vehículo", "Chofer", "Material", "Fecha", "Hora inicio", "Hora fin"]
-    ws.append(headers)
-
+    # Encabezados, incluye Observaciones
+    ws.append([
+        "ID", "Obra", "Vehículo", "Chofer", "Material", "Fecha",
+        "Inicio", "Fin", "Observaciones"
+    ])
     for a in asignaciones:
         ws.append([
-            a.cliente.nombre,
-            a.vehiculo.codigo,
+            a.id,
+            a.cliente.nombre if a.cliente else "",
+            f"{a.vehiculo.codigo} ({a.vehiculo.dominio})" if a.vehiculo else "",
             a.chofer,
             a.material,
-            a.fecha.strftime('%Y-%m-%d'),
-            a.hora_inicio.strftime('%H:%M'),
-            a.hora_fin.strftime('%H:%M'),
+            a.fecha.strftime('%Y-%m-%d') if a.fecha else "",
+            a.hora_inicio.strftime('%H:%M') if a.hora_inicio else "",
+            a.hora_fin.strftime('%H:%M') if a.hora_fin else "",
+            a.observaciones or ""
         ])
-
-    output = io.BytesIO()
+    from io import BytesIO
+    output = BytesIO()
     wb.save(output)
     output.seek(0)
-
     return send_file(
         output,
+        download_name="asignaciones.xlsx",
         as_attachment=True,
-        download_name='asignaciones.xlsx',
-        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
+
+@main.route('/asignaciones')
+def asignaciones():
+    page = request.args.get('page', 1, type=int)
+    per_page = 10
+    asignaciones_query = Asignacion.query.order_by(Asignacion.fecha.desc())
+    total = asignaciones_query.count()
+    total_pages = max((total + per_page - 1) // per_page, 1)
+    asignaciones = asignaciones_query.offset((page - 1) * per_page).limit(per_page).all()
+    clientes = Cliente.query.all()
+    vehiculos = Vehiculo.query.all()
+    return render_template(
+        'asignaciones.html',
+        asignaciones=asignaciones,
+        clientes=clientes,
+        vehiculos=vehiculos,
+        page=page,
+        total_pages=total_pages
+    )
+
+@main.route('/asignaciones/observaciones/<int:id>', methods=['POST'])
+def editar_observaciones(id):
+    a = Asignacion.query.get_or_404(id)
+    a.observaciones = request.form['observaciones'].strip()
+    db.session.commit()
+    flash('Observaciones actualizadas', 'success')
+    return redirect(url_for('main.asignaciones'))
