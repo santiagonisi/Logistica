@@ -1,7 +1,7 @@
 CREATE TABLE asignacion_new (
     id INTEGER PRIMARY KEY,
     cliente_id INTEGER NOT NULL,
-    vehiculo_id INTEGER, -- Permite NULL
+    vehiculo_id INTEGER,
     equipo_id INTEGER,
     chofer TEXT,
     material TEXT,
