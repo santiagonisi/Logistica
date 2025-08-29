@@ -58,11 +58,11 @@
   </div>
   <div class="col-md-3">
     <label class="form-label">Inicio</label>
-    <input type="time" name="hora_inicio" class="form-control" required>
+    <input type="time" name="hora_inicio" class="form-control">
   </div>
   <div class="col-md-3">
     <label class="form-label">Fin</label>
-    <input type="time" name="hora_fin" class="form-control" required>
+    <input type="time" name="hora_fin" class="form-control">
   </div>
   <div class="col-md-3">
     <label class="form-label">¿Vehículo/equipo de terceros?</label>
@@ -248,11 +248,11 @@
                           </div>
                           <div class="col-md-2">
                             <label class="form-label">Inicio</label>
-                            <input type="time" name="hora_inicio" class="form-control" value="{{ a.hora_inicio.strftime('%H:%M') }}" required>
+                            <input type="time" name="hora_inicio" class="form-control" value="{{ a.hora_inicio.strftime('%H:%M') }}">
                           </div>
                           <div class="col-md-2">
                             <label class="form-label">Fin</label>
-                            <input type="time" name="hora_fin" class="form-control" value="{{ a.hora_fin.strftime('%H:%M') }}" required>
+                            <input type="time" name="hora_fin" class="form-control" value="{{ a.hora_fin.strftime('%H:%M') }}">
                           </div>
                         </div>
                       </div>
