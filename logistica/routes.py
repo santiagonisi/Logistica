@@ -186,9 +186,9 @@ def exportar_asignaciones():
         ws.append(row)
         cell = ws.cell(row=ws.max_row, column=5)
         if empresa == "Iarsa":
-            cell.fill = PatternFill(start_color="C6EFCE", end_color="C6EFCE", fill_type="solid")  # Verde claro
+            cell.fill = PatternFill(start_color="C6EFCE", end_color="C6EFCE", fill_type="solid")
         else:
-            cell.fill = PatternFill(start_color="FFEB9C", end_color="FFEB9C", fill_type="solid")  # Amarillo claro
+            cell.fill = PatternFill(start_color="FFEB9C", end_color="FFEB9C", fill_type="solid")
     from io import BytesIO
     output = BytesIO()
     wb.save(output)
