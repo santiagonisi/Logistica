@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from .models import db, Vehiculo, Cliente, Asignacion
 from datetime import datetime
 from openpyxl import Workbook
+from openpyxl.styles import PatternFill
 import io
 
 main = Blueprint('main', __name__)
@@ -164,21 +165,30 @@ def exportar_asignaciones():
     ws = wb.active
     ws.title = "Asignaciones"
     ws.append([
-        "ID", "Obra", "Vehículo", "Chofer", "Material", "Fecha",
-        "Inicio", "Fin", "Observaciones"
+        "ID", "Obra", "Vehículo", "Equipo", "Empresa",
+        "Chofer", "Material", "Fecha", "Inicio", "Fin", "Observaciones"
     ])
     for a in asignaciones:
-        ws.append([
+        empresa = "Iarsa" if not a.es_tercero else (a.empresa_tercero or "Contratado")
+        row = [
             a.id,
             a.cliente.nombre if a.cliente else "",
-            f"{a.vehiculo.codigo} ({a.vehiculo.dominio})" if a.vehiculo else "",
+            a.vehiculo_tercero if a.es_tercero else (f"{a.vehiculo.codigo} ({a.vehiculo.dominio})" if a.vehiculo else ""),
+            a.equipo_tercero if a.es_tercero else (f"{a.equipo.codigo} ({a.equipo.dominio})" if hasattr(a, 'equipo') and a.equipo else ""),
+            empresa,
             a.chofer,
             a.material,
             a.fecha.strftime('%Y-%m-%d') if a.fecha else "",
             a.hora_inicio.strftime('%H:%M') if a.hora_inicio else "",
             a.hora_fin.strftime('%H:%M') if a.hora_fin else "",
             a.observaciones or ""
-        ])
+        ]
+        ws.append(row)
+        cell = ws.cell(row=ws.max_row, column=5)
+        if empresa == "Iarsa":
+            cell.fill = PatternFill(start_color="C6EFCE", end_color="C6EFCE", fill_type="solid")  # Verde claro
+        else:
+            cell.fill = PatternFill(start_color="FFEB9C", end_color="FFEB9C", fill_type="solid")  # Amarillo claro
     from io import BytesIO
     output = BytesIO()
     wb.save(output)
