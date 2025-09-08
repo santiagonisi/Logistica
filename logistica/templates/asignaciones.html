@@ -167,15 +167,19 @@
                   {% endif %}
                 </td>
                 <td>
-                  <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#modalEditar{{ a.id }}">
-                    <i class="bi bi-pencil-square"></i>
-                  </button>
-                  <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#modalObservaciones{{ a.id }}">
-                    <i class="bi bi-chat-dots"></i>
-                  </button>
-                  <a href="{{ url_for('main.eliminar_asignacion', id=a.id) }}" class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar asignación?');">
-                    <i class="bi bi-trash"></i>
-                  </a>
+                  <div class="d-flex flex-column gap-1">
+                    <div class="d-flex gap-1">
+                      <button class="btn btn-warning btn-sm flex-fill" data-bs-toggle="modal" data-bs-target="#modalEditar{{ a.id }}">
+                        <i class="bi bi-pencil-square"></i>
+                      </button>
+                      <button class="btn btn-info btn-sm flex-fill" data-bs-toggle="modal" data-bs-target="#modalObservaciones{{ a.id }}">
+                        <i class="bi bi-chat-dots"></i>
+                      </button>
+                    </div>
+                    <a href="{{ url_for('main.eliminar_asignacion', id=a.id) }}" class="btn btn-danger btn-sm w-100 mt-1" onclick="return confirm('¿Eliminar asignación?');">
+                      <i class="bi bi-trash"></i>
+                    </a>
+                  </div>
                 </td>
               </tr>
 
