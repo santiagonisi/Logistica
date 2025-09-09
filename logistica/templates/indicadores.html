@@ -1,0 +1,128 @@
+{% extends "index.html" %}
+
+{% block content %}
+<div class="container my-4">
+    <h2 class="mb-4">Indicadores de Logística</h2>
+
+    <!-- Formulario de filtrado -->
+    <form method="POST" class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <label for="mes" class="form-label">Mes</label>
+            <input type="number" id="mes" name="mes" class="form-control"
+                   value="{{ mes | default(1) }}" min="1" max="12" required>
+        </div>
+        <div class="col-6 col-md-3">
+            <label for="anio" class="form-label">Año</label>
+            <input type="number" id="anio" name="anio" class="form-control"
+                   value="{{ anio | default(2025) }}" min="2000" max="2100" required>
+        </div>
+        <div class="col-12 col-md-3 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+        </div>
+        <div class="col-12 col-md-3 d-flex align-items-end">
+            <a href="{{ url_for('main.exportar_indicadores', mes=mes, anio=anio) }}"
+               class="btn btn-success w-100">Exportar Excel</a>
+        </div>
+    </form>
+
+    <!-- Gráfico Doughnut -->
+    <div class="row align-items-center mb-4 flex-wrap">
+        <div class="col-12 col-md-auto d-flex justify-content-center mb-3 mb-md-0">
+            <canvas id="viajesChart" style="max-width:300px; max-height:300px;"></canvas>
+        </div>
+        <div class="col-12 col-md">
+            <div class="card p-3 shadow-sm h-100">
+                <h5>Resumen de Viajes (Mes {{ mes }}, Año {{ anio }})</h5>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item text-truncate">
+                        <strong>Vehículos Propios:</strong> {{ propios }} viajes ({{ porcentaje_propios }}%)
+                    </li>
+                    <li class="list-group-item text-truncate">
+                        <strong>Vehículos Terceros:</strong> {{ terceros }} viajes ({{ porcentaje_terceros }}%)
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Total de viajes:</strong> {{ propios + terceros }}
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráfico por chofer -->
+    <div class="card p-3 shadow-sm mb-4">
+        <h5>Viajes Propios por Chofer</h5>
+        <div style="overflow-x:auto;">
+            <canvas id="choferChart" style="min-width:300px; max-height:400px;"></canvas>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+    // Valores seguros
+    var propios = {{ propios | int }};
+    var terceros = {{ terceros | int }};
+    var porcentaje_propios = {{ porcentaje_propios | int }};
+    var porcentaje_terceros = {{ porcentaje_terceros | int }};
+
+    // Doughnut chart
+    var ctxDoughnut = document.getElementById('viajesChart').getContext('2d');
+    new Chart(ctxDoughnut, {
+        type: 'doughnut',
+        data: {
+            labels: [
+                `Propios (${propios} viajes, ${porcentaje_propios}%)`,
+                `Terceros (${terceros} viajes, ${porcentaje_terceros}%)`
+            ],
+            datasets: [{
+                data: [propios, terceros],
+                backgroundColor: ['#4e73df', '#f6c23e'],
+                borderColor: '#fff',
+                borderWidth: 2,
+                hoverOffset: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: { position: 'bottom', labels: { font: { size: 14 }, boxWidth: 20, padding: 15 } },
+                tooltip: { callbacks: { label: ctx => ctx.label } }
+            }
+        }
+    });
+
+    // Gráfico por chofer
+    var viajesChofer = {{ viajes_chofer | tojson }};
+    var labels = viajesChofer.map(v => v[0]);
+    var data = viajesChofer.map(v => v[1]);
+    var ctxBar = document.getElementById('choferChart').getContext('2d');
+
+    if (data.length === 0) {
+        // Sin datos
+        new Chart(ctxBar, {
+            type: 'bar',
+            data: { labels: ['Sin datos'], datasets: [{ data: [0], backgroundColor: '#d1d3e2' }] },
+            options: {
+                plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                scales: { y: { beginAtZero: true }, x: { ticks: { autoSkip: false } } }
+            }
+        });
+    } else {
+        // Datos reales
+        new Chart(ctxBar, {
+            type: 'bar',
+            data: { labels: labels, datasets: [{ label: 'Cantidad de viajes propios', data: data, backgroundColor: '#4e73df' }] },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false }, tooltip: { enabled: true } },
+                scales: { y: { beginAtZero: true }, x: { ticks: { autoSkip: false, maxRotation: 90, minRotation: 0 } } }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
+

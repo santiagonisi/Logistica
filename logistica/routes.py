@@ -3,6 +3,7 @@ from .models import db, Vehiculo, Cliente, Asignacion
 from datetime import datetime
 from openpyxl import Workbook
 from openpyxl.styles import PatternFill
+from sqlalchemy import extract
 import io
 
 main = Blueprint('main', __name__)
@@ -226,3 +227,113 @@ def editar_observaciones(id):
     db.session.commit()
     flash('Observaciones actualizadas', 'success')
     return redirect(url_for('main.asignaciones'))
+
+
+@main.route('/indicadores', methods=['GET', 'POST'])
+def indicadores():
+    # Mes y año por defecto
+    mes = datetime.now().month
+    anio = datetime.now().year
+
+    # Si viene por POST, usamos los valores del formulario
+    if request.method == 'POST':
+        mes = int(request.form.get('mes', mes))
+        anio = int(request.form.get('anio', anio))
+
+    # Conteo de viajes propios y de terceros
+    propios = Asignacion.query.filter(
+        extract('month', Asignacion.fecha) == mes,
+        extract('year', Asignacion.fecha) == anio,
+        Asignacion.es_tercero == False
+    ).count()
+
+    terceros = Asignacion.query.filter(
+        extract('month', Asignacion.fecha) == mes,
+        extract('year', Asignacion.fecha) == anio,
+        Asignacion.es_tercero == True
+    ).count()
+
+    total = propios + terceros
+    porcentaje_propios = round((propios / total) * 100, 2) if total > 0 else 0
+    porcentaje_terceros = round((terceros / total) * 100, 2) if total > 0 else 0
+
+    # Consulta de viajes por chofer
+    viajes_chofer_query = db.session.query(
+        Asignacion.chofer,
+        db.func.count(Asignacion.id)
+    ).filter(
+        extract('month', Asignacion.fecha) == mes,
+        extract('year', Asignacion.fecha) == anio,
+        Asignacion.es_tercero == False
+    ).group_by(Asignacion.chofer).all()
+
+    # Convertimos Rows a lista de listas serializable
+    viajes_chofer = [[row[0], row[1]] for row in viajes_chofer_query] if viajes_chofer_query else []
+
+    return render_template(
+        'indicadores.html',
+        mes=mes,
+        anio=anio,
+        propios=propios,
+        terceros=terceros,
+        porcentaje_propios=porcentaje_propios,
+        porcentaje_terceros=porcentaje_terceros,
+        viajes_chofer=viajes_chofer
+    )
+
+@main.route('/indicadores/exportar/<int:mes>/<int:anio>')
+def exportar_indicadores(mes, anio):
+    # Totales
+    propios = Asignacion.query.filter(
+        extract('month', Asignacion.fecha) == mes,
+        extract('year', Asignacion.fecha) == anio,
+        Asignacion.es_tercero == False
+    ).count()
+
+    terceros = Asignacion.query.filter(
+        extract('month', Asignacion.fecha) == mes,
+        extract('year', Asignacion.fecha) == anio,
+        Asignacion.es_tercero == True
+    ).count()
+
+    total = propios + terceros
+    porcentaje_propios = round((propios / total) * 100, 2) if total > 0 else 0
+    porcentaje_terceros = round((terceros / total) * 100, 2) if total > 0 else 0
+
+    # Viajes por chofer
+    viajes_chofer = db.session.query(
+        Asignacion.chofer,
+        db.func.count(Asignacion.id)
+    ).filter(
+        extract('month', Asignacion.fecha) == mes,
+        extract('year', Asignacion.fecha) == anio,
+        Asignacion.es_tercero == False
+    ).group_by(Asignacion.chofer).all()
+
+    # Crear Excel
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Indicadores"
+
+    # Totales
+    ws.append(["Indicador", "Cantidad", "Porcentaje"])
+    ws.append(["Propios", propios, f"{porcentaje_propios}%"])
+    ws.append(["Terceros", terceros, f"{porcentaje_terceros}%"])
+    ws.append(["Total", total, "100%"])
+    ws.append([])
+
+    # Viajes por chofer
+    ws.append(["Chofer", "Cantidad de viajes"])
+    for chofer, cantidad in viajes_chofer:
+        ws.append([chofer, cantidad])
+
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    return send_file(
+        output,
+        download_name=f"indicadores_{mes}_{anio}.xlsx",
+        as_attachment=True,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
