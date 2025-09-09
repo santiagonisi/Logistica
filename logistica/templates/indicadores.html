@@ -4,7 +4,7 @@
 <div class="container my-4">
     <h2 class="mb-4">Indicadores de Logística</h2>
 
-    <!-- Formulario de filtrado -->
+    
     <form method="POST" class="row g-3 mb-4">
         <div class="col-6 col-md-3">
             <label for="mes" class="form-label">Mes</label>
@@ -25,7 +25,7 @@
         </div>
     </form>
 
-    <!-- Gráfico Doughnut -->
+    
     <div class="row align-items-center mb-4 flex-wrap">
         <div class="col-12 col-md-auto d-flex justify-content-center mb-3 mb-md-0">
             <canvas id="viajesChart" style="max-width:300px; max-height:300px;"></canvas>
@@ -48,7 +48,7 @@
         </div>
     </div>
 
-    <!-- Gráfico por chofer -->
+    
     <div class="card p-3 shadow-sm mb-4">
         <h5>Viajes Propios por Chofer</h5>
         <div style="overflow-x:auto;">
@@ -60,13 +60,13 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-    // Valores seguros
+    
     var propios = {{ propios | int }};
     var terceros = {{ terceros | int }};
     var porcentaje_propios = {{ porcentaje_propios | int }};
     var porcentaje_terceros = {{ porcentaje_terceros | int }};
 
-    // Doughnut chart
+    
     var ctxDoughnut = document.getElementById('viajesChart').getContext('2d');
     new Chart(ctxDoughnut, {
         type: 'doughnut',
@@ -93,14 +93,14 @@
         }
     });
 
-    // Gráfico por chofer
+    
     var viajesChofer = {{ viajes_chofer | tojson }};
     var labels = viajesChofer.map(v => v[0]);
     var data = viajesChofer.map(v => v[1]);
     var ctxBar = document.getElementById('choferChart').getContext('2d');
 
     if (data.length === 0) {
-        // Sin datos
+        
         new Chart(ctxBar, {
             type: 'bar',
             data: { labels: ['Sin datos'], datasets: [{ data: [0], backgroundColor: '#d1d3e2' }] },
@@ -110,7 +110,7 @@
             }
         });
     } else {
-        // Datos reales
+        
         new Chart(ctxBar, {
             type: 'bar',
             data: { labels: labels, datasets: [{ label: 'Cantidad de viajes propios', data: data, backgroundColor: '#4e73df' }] },
