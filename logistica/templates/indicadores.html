@@ -4,7 +4,6 @@
 <div class="container my-4">
     <h2 class="mb-4">Indicadores de Logística</h2>
 
-    
     <form method="POST" class="row g-3 mb-4">
         <div class="col-6 col-md-3">
             <label for="mes" class="form-label">Mes</label>
@@ -17,11 +16,11 @@
                    value="{{ anio | default(2025) }}" min="2000" max="2100" required>
         </div>
         <div class="col-12 col-md-3 d-flex align-items-end">
-            <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+            <button type="submit" class="btn btn-primary w-100" aria-label="Filtrar indicadores">Filtrar</button>
         </div>
         <div class="col-12 col-md-3 d-flex align-items-end">
             <a href="{{ url_for('main.exportar_indicadores', mes=mes, anio=anio) }}"
-               class="btn btn-success w-100">Exportar Excel</a>
+               class="btn btn-success w-100" aria-label="Exportar indicadores en Excel">Exportar Excel</a>
         </div>
     </form>
 
@@ -34,37 +33,74 @@
             <div class="card p-3 shadow-sm h-100">
                 <h5>Resumen de Viajes (Mes {{ mes }}, Año {{ anio }})</h5>
                 <ul class="list-group list-group-flush">
-                    <li class="list-group-item text-truncate">
-                        <strong>Vehículos Propios:</strong> {{ propios }} viajes ({{ porcentaje_propios }}%)
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span><strong>Vehículos Propios:</strong></span>
+                        <span>{{ propios }} viajes ({{ porcentaje_propios }}%)</span>
                     </li>
-                    <li class="list-group-item text-truncate">
-                        <strong>Vehículos Terceros:</strong> {{ terceros }} viajes ({{ porcentaje_terceros }}%)
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span><strong>Vehículos Terceros:</strong></span>
+                        <span>{{ terceros }} viajes ({{ porcentaje_terceros }}%)</span>
                     </li>
-                    <li class="list-group-item">
-                        <strong>Total de viajes:</strong> {{ propios + terceros }}
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span><strong>Total de viajes:</strong></span>
+                        <span>{{ propios + terceros }}</span>
                     </li>
                 </ul>
             </div>
         </div>
     </div>
 
-    
     <div class="card p-3 shadow-sm mb-4">
         <h5>Viajes Propios por Chofer</h5>
         <div style="overflow-x:auto;">
             <canvas id="choferChart" style="min-width:300px; max-height:400px;"></canvas>
         </div>
     </div>
+    
+    <div class="card p-3 shadow-sm mb-4">
+        <div class="row align-items-center">
+            <div class="col-12 col-md-4 d-flex justify-content-center mb-3 mb-md-0">
+                <canvas id="tercerosChart" style="max-width:320px; max-height:320px;"></canvas>
+            </div>
+            <div class="col-12 col-md-8">
+                <h5>Trabajo por Empresas de Terceros (Mes {{ mes }}, Año {{ anio }})</h5>
+                <p class="mb-2">Distribución del total de viajes realizados por empresas externas.</p>
+                <div id="tercerosLeyenda" class="small text-muted"></div>
+            </div>
+        </div>
+    </div>
+
+    
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function() {
+
     
     var propios = {{ propios | int }};
     var terceros = {{ terceros | int }};
     var porcentaje_propios = {{ porcentaje_propios | int }};
     var porcentaje_terceros = {{ porcentaje_terceros | int }};
+
+    
+    var viajesChofer = {{ viajes_chofer | tojson }};
+
+    
+    
+    var tercerosPorEmpresa = {{ terceros_por_empresa | default([]) | tojson }};
+
+    
+    function generateHslColors(n) {
+        var colors = [];
+        if (n === 0) return colors;
+        for (var i = 0; i < n; i++) {
+            var hue = Math.round((i * 360) / n);
+            colors.push('hsl(' + hue + ', 65%, 55%)');
+        }
+        return colors;
+    }
 
     
     var ctxDoughnut = document.getElementById('viajesChart').getContext('2d');
@@ -88,19 +124,82 @@
             maintainAspectRatio: true,
             plugins: {
                 legend: { position: 'bottom', labels: { font: { size: 14 }, boxWidth: 20, padding: 15 } },
-                tooltip: { callbacks: { label: ctx => ctx.label } }
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.label;
+                        }
+                    }
+                }
             }
         }
     });
 
     
-    var viajesChofer = {{ viajes_chofer | tojson }};
+    var empresasLabels = tercerosPorEmpresa.map(e => e[0]);
+    var empresasData = tercerosPorEmpresa.map(e => e[1]);
+
+    var ctxTerceros = document.getElementById('tercerosChart').getContext('2d');
+    if (empresasData.length === 0) {
+        
+        new Chart(ctxTerceros, {
+            type: 'doughnut',
+            data: { labels: ['Sin datos'], datasets: [{ data: [0], backgroundColor: ['#e9ecef'] }] },
+            options: { plugins: { legend: { display: false }, tooltip: { enabled: false } } }
+        });
+        document.getElementById('tercerosLeyenda').innerText = "No hay viajes de terceros para el periodo seleccionado.";
+    } else {
+        var colors = generateHslColors(empresasData.length);
+
+        new Chart(ctxTerceros, {
+            type: 'doughnut',
+            data: {
+                labels: empresasLabels,
+                datasets: [{
+                    data: empresasData,
+                    backgroundColor: colors,
+                    borderColor: '#fff',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12 } },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                var label = context.label || '';
+                                var value = context.raw || 0;
+                                var sum = context.dataset.data.reduce((a,b) => a + b, 0);
+                                var pct = sum ? ((value / sum) * 100).toFixed(1) : 0;
+                                return label + ': ' + value + ' viajes (' + pct + '%)';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        
+        var leyendaDiv = document.getElementById('tercerosLeyenda');
+        var total = empresasData.reduce((a,b) => a + b, 0);
+        var lines = tercerosPorEmpresa.map(function(item){
+            var name = item[0];
+            var cnt = item[1];
+            var pct = total ? ((cnt / total) * 100).toFixed(1) : 0;
+            return name + ': ' + cnt + ' viajes (' + pct + '%)';
+        });
+        leyendaDiv.innerHTML = lines.join('<br>');
+    }
+
+    
     var labels = viajesChofer.map(v => v[0]);
     var data = viajesChofer.map(v => v[1]);
     var ctxBar = document.getElementById('choferChart').getContext('2d');
 
     if (data.length === 0) {
-        
         new Chart(ctxBar, {
             type: 'bar',
             data: { labels: ['Sin datos'], datasets: [{ data: [0], backgroundColor: '#d1d3e2' }] },
@@ -110,7 +209,6 @@
             }
         });
     } else {
-        
         new Chart(ctxBar, {
             type: 'bar',
             data: { labels: labels, datasets: [{ label: 'Cantidad de viajes propios', data: data, backgroundColor: '#4e73df' }] },
@@ -122,7 +220,7 @@
             }
         });
     }
+
 });
 </script>
 {% endblock %}
-
