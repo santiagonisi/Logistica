@@ -190,8 +190,7 @@ def exportar_asignaciones():
             cell.fill = PatternFill(start_color="C6EFCE", end_color="C6EFCE", fill_type="solid")
         else:
             cell.fill = PatternFill(start_color="FFEB9C", end_color="FFEB9C", fill_type="solid")
-    from io import BytesIO
-    output = BytesIO()
+    output = io.BytesIO()
     wb.save(output)
     output.seek(0)
     return send_file(
@@ -231,16 +230,13 @@ def editar_observaciones(id):
 
 @main.route('/indicadores', methods=['GET', 'POST'])
 def indicadores():
-    
     mes = datetime.now().month
     anio = datetime.now().year
 
-    
     if request.method == 'POST':
         mes = int(request.form.get('mes', mes))
         anio = int(request.form.get('anio', anio))
 
-    
     propios = Asignacion.query.filter(
         extract('month', Asignacion.fecha) == mes,
         extract('year', Asignacion.fecha) == anio,
@@ -257,7 +253,6 @@ def indicadores():
     porcentaje_propios = round((propios / total) * 100, 2) if total > 0 else 0
     porcentaje_terceros = round((terceros / total) * 100, 2) if total > 0 else 0
 
-    
     viajes_chofer_query = db.session.query(
         Asignacion.chofer,
         db.func.count(Asignacion.id)
@@ -266,9 +261,19 @@ def indicadores():
         extract('year', Asignacion.fecha) == anio,
         Asignacion.es_tercero == False
     ).group_by(Asignacion.chofer).all()
-
-    
     viajes_chofer = [[row[0], row[1]] for row in viajes_chofer_query] if viajes_chofer_query else []
+
+    # viajes por empresa de terceros
+    viajes_terceros_empresa_query = db.session.query(
+        Asignacion.empresa_tercero,
+        db.func.count(Asignacion.id)
+    ).filter(
+        extract('month', Asignacion.fecha) == mes,
+        extract('year', Asignacion.fecha) == anio,
+        Asignacion.es_tercero == True,
+        Asignacion.empresa_tercero != None
+    ).group_by(Asignacion.empresa_tercero).all()
+    viajes_terceros_empresa = [[row[0], row[1]] for row in viajes_terceros_empresa_query] if viajes_terceros_empresa_query else []
 
     return render_template(
         'indicadores.html',
@@ -278,12 +283,12 @@ def indicadores():
         terceros=terceros,
         porcentaje_propios=porcentaje_propios,
         porcentaje_terceros=porcentaje_terceros,
-        viajes_chofer=viajes_chofer
+        viajes_chofer=viajes_chofer,
+        terceros_por_empresa=viajes_terceros_empresa
     )
 
 @main.route('/indicadores/exportar/<int:mes>/<int:anio>')
 def exportar_indicadores(mes, anio):
-    
     propios = Asignacion.query.filter(
         extract('month', Asignacion.fecha) == mes,
         extract('year', Asignacion.fecha) == anio,
@@ -300,7 +305,6 @@ def exportar_indicadores(mes, anio):
     porcentaje_propios = round((propios / total) * 100, 2) if total > 0 else 0
     porcentaje_terceros = round((terceros / total) * 100, 2) if total > 0 else 0
 
-    
     viajes_chofer = db.session.query(
         Asignacion.chofer,
         db.func.count(Asignacion.id)
@@ -310,22 +314,35 @@ def exportar_indicadores(mes, anio):
         Asignacion.es_tercero == False
     ).group_by(Asignacion.chofer).all()
 
-    
+    # viajes por empresa de terceros
+    viajes_terceros_empresa = db.session.query(
+        Asignacion.empresa_tercero,
+        db.func.count(Asignacion.id)
+    ).filter(
+        extract('month', Asignacion.fecha) == mes,
+        extract('year', Asignacion.fecha) == anio,
+        Asignacion.es_tercero == True,
+        Asignacion.empresa_tercero != None
+    ).group_by(Asignacion.empresa_tercero).all()
+
     wb = Workbook()
     ws = wb.active
     ws.title = "Indicadores"
 
-    
     ws.append(["Indicador", "Cantidad", "Porcentaje"])
     ws.append(["Propios", propios, f"{porcentaje_propios}%"])
     ws.append(["Terceros", terceros, f"{porcentaje_terceros}%"])
     ws.append(["Total", total, "100%"])
     ws.append([])
 
-    
     ws.append(["Chofer", "Cantidad de viajes"])
     for chofer, cantidad in viajes_chofer:
         ws.append([chofer, cantidad])
+
+    ws.append([])
+    ws.append(["Empresa de terceros", "Cantidad de viajes"])
+    for empresa, cantidad in viajes_terceros_empresa:
+        ws.append([empresa, cantidad])
 
     output = io.BytesIO()
     wb.save(output)
