@@ -14,6 +14,11 @@
     <div class="col-md-4">
         <select name="comitente" class="form-select" required>
             <option value="">Seleccionar Comitente</option>
+            {% if comitentes %}
+                {% for com in comitentes %}
+                <option value="{{ com.nombre }}">{{ com.nombre }}</option>
+                {% endfor %}
+            {% else %}
             <option value="DVBA">DVBA</option>
             <option value="DNV">DNV</option>
             <option value="Municipalidad San Nicolas">Municipalidad San Nicolas</option>
@@ -31,12 +36,42 @@
             <option value="Caso Jorge">Caso Jorge</option>
             <option value="Unidad Ejecutora Corredor Vial N°4">Unidad Ejecutora Corredor Vial N°4</option>
             <option value="Autovía Construcciones y Servicios SA">Autovía Construcciones y Servicios SA</option>
+            {% endif %}
         </select>
     </div>
-    <div class="col-md-12 d-flex align-items-end">
-    <button type="submit" class="btn btn-primary form-control">Agregar</button>
+    <div class="col-md-6">
+        <button type="submit" class="btn btn-primary form-control">Agregar Cliente</button>
+    </div>
+    <div class="col-md-6">
+        <button type="button" class="btn btn-success form-control" data-bs-toggle="modal" data-bs-target="#nuevoComitente">
+            Agregar Nuevo Comitente
+        </button>
     </div>
 </form>
+
+<!-- Modal para agregar comitente -->
+<div class="modal fade" id="nuevoComitente" tabindex="-1" aria-labelledby="nuevoComitenteLbl" aria-hidden="true">
+  <div class="modal-dialog">
+    <form method="POST" action="{{ url_for('main.agregar_comitente') }}">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="nuevoComitenteLbl">Agregar Nuevo Comitente</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Nombre del Comitente</label>
+            <input type="text" name="nombre" class="form-control" placeholder="Ej: Municipalidad de..." required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-success">Agregar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
 
 
 <table class="table table-bordered table-hover align-middle">
@@ -46,6 +81,7 @@
             <th>Nombre</th>
             <th>Ubicación</th>
             <th>Comitente</th>
+            <th>Editar</th>
             <th>Dar de Baja</th>
         </tr>
     </thead>
@@ -56,6 +92,68 @@
             <td>{{ c.nombre }}</td>
             <td>{{ c.ubicacion }}</td>
             <td>{{ c.comitente }}</td>
+            <td>
+                
+                <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editarModal{{ c.id }}">
+                    <i class="bi bi-pencil"></i>
+                </button>
+                
+                <div class="modal fade" id="editarModal{{ c.id }}" tabindex="-1" aria-labelledby="editarModalLabel{{ c.id }}" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <form method="POST" action="{{ url_for('main.editar_cliente', id=c.id) }}">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="editarModalLabel{{ c.id }}">Editar Cliente</h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                        </div>
+                        <div class="modal-body">
+                          <div class="mb-2">
+                            <label class="form-label">Nombre</label>
+                            <input type="text" name="nombre" class="form-control" value="{{ c.nombre }}" required>
+                          </div>
+                          <div class="mb-2">
+                            <label class="form-label">Ubicación</label>
+                            <input type="text" name="ubicacion" class="form-control" value="{{ c.ubicacion }}" required>
+                          </div>
+                          <div class="mb-2">
+                            <label class="form-label">Comitente</label>
+                            <select name="comitente" class="form-select" required>
+                                <option value="">Seleccionar Comitente</option>
+                                {% if comitentes %}
+                                    {% for com in comitentes %}
+                                    <option value="{{ com.nombre }}" {% if c.comitente == com.nombre %}selected{% endif %}>{{ com.nombre }}</option>
+                                    {% endfor %}
+                                {% else %}
+                                <option value="DVBA" {% if c.comitente == 'DVBA' %}selected{% endif %}>DVBA</option>
+                                <option value="DNV" {% if c.comitente == 'DNV' %}selected{% endif %}>DNV</option>
+                                <option value="Municipalidad San Nicolas" {% if c.comitente == 'Municipalidad San Nicolas' %}selected{% endif %}>Municipalidad San Nicolas</option>
+                                <option value="Municipalidad Ramallo" {% if c.comitente == 'Municipalidad Ramallo' %}selected{% endif %}>Municipalidad Ramallo</option>
+                                <option value="Municipalidad San Pedro" {% if c.comitente == 'Municipalidad San Pedro' %}selected{% endif %}>Municipalidad San Pedro</option>
+                                <option value="Municipalidad Pergamino" {% if c.comitente == 'Municipalidad Pergamino' %}selected{% endif %}>Municipalidad Pergamino</option>
+                                <option value="Municipalidad Baradero" {% if c.comitente == 'Municipalidad Baradero' %}selected{% endif %}>Municipalidad Baradero</option>
+                                <option value="Municipalidad Rojas" {% if c.comitente == 'Municipalidad Rojas' %}selected{% endif %}>Municipalidad Rojas</option>
+                                <option value="Alloco" {% if c.comitente == 'Alloco' %}selected{% endif %}>Alloco</option>
+                                <option value="IARSA" {% if c.comitente == 'IARSA' %}selected{% endif %}>IARSA</option>
+                                <option value="Saj Construcciones" {% if c.comitente == 'Saj Construcciones' %}selected{% endif %}>Saj Construcciones</option>
+                                <option value="Arenera Villa Ramallo SA" {% if c.comitente == 'Arenera Villa Ramallo SA' %}selected{% endif %}>Arenera Villa Ramallo SA</option>
+                                <option value="Edeca S.A" {% if c.comitente == 'Edeca S.A' %}selected{% endif %}>Edeca S.A</option>
+                                <option value="Marbuy" {% if c.comitente == 'Marbuy' %}selected{% endif %}>Marbuy</option>
+                                <option value="Caso Jorge" {% if c.comitente == 'Caso Jorge' %}selected{% endif %}>Caso Jorge</option>
+                                <option value="Unidad Ejecutora Corredor Vial N°4" {% if c.comitente == 'Unidad Ejecutora Corredor Vial N°4' %}selected{% endif %}>Unidad Ejecutora Corredor Vial N°4</option>
+                                <option value="Autovía Construcciones y Servicios SA" {% if c.comitente == 'Autovía Construcciones y Servicios SA' %}selected{% endif %}>Autovía Construcciones y Servicios SA</option>
+                                {% endif %}
+                            </select>
+                          </div>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                          <button type="submit" class="btn btn-warning">Guardar Cambios</button>
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+            </td>
             <td>
                 <a href="{{ url_for('main.baja_cliente', id=c.id) }}" class="btn btn-danger btn-sm">
                     <i class="bi bi-trash"></i>

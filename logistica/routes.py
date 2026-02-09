@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, send_file
-from .models import db, Vehiculo, Cliente, Asignacion
+from .models import db, Vehiculo, Cliente, Asignacion, Comitente
 from datetime import datetime
 from openpyxl import Workbook
 from openpyxl.styles import PatternFill
@@ -82,8 +82,10 @@ def clientes():
     page = request.args.get('page', 1, type=int)
     query = Cliente.query.filter_by(estado="Activo").order_by(Cliente.id)
     clientes, total, total_pages, page = paginar_query(query, page)
+    comitentes = Comitente.query.filter_by(estado="Activo").order_by(Comitente.nombre).all()
     return render_template('clientes.html',
                            clientes=clientes,
+                           comitentes=comitentes,
                            page=page,
                            total_pages=total_pages)
 
@@ -104,6 +106,26 @@ def agregar_cliente():
     )
     db.session.add(nuevo)
     db.session.commit()
+    return redirect(url_for('main.clientes'))
+
+@main.route('/clientes/editar/<int:id>', methods=['POST'])
+def editar_cliente(id):
+    cliente = Cliente.query.get_or_404(id)
+    cliente.nombre = request.form['nombre']
+    cliente.ubicacion = request.form['ubicacion']
+    cliente.comitente = request.form['comitente']
+    db.session.commit()
+    return redirect(url_for('main.clientes'))
+
+@main.route('/comitentes/agregar', methods=['POST'])
+def agregar_comitente():
+    nuevo_comitente = Comitente(
+        nombre=request.form['nombre'],
+        estado="Activo"
+    )
+    db.session.add(nuevo_comitente)
+    db.session.commit()
+    flash('Comitente agregado correctamente', 'success')
     return redirect(url_for('main.clientes'))
 
 
