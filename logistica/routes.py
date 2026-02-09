@@ -294,6 +294,17 @@ def indicadores():
         Asignacion.lluvia == False
     ).scalar() or 0
 
+    # viajes por chofer
+    viajes_chofer_query = db.session.query(
+        Asignacion.chofer,
+        db.func.count(Asignacion.id)
+    ).filter(
+        extract('month', Asignacion.fecha) == mes,
+        extract('year', Asignacion.fecha) == anio,
+        Asignacion.es_tercero == False
+    ).group_by(Asignacion.chofer).all()
+    viajes_chofer = [[row[0], row[1]] for row in viajes_chofer_query] if viajes_chofer_query else []
+
     viajes_terceros_empresa_query = db.session.query(
         Asignacion.empresa_tercero,
         db.func.count(Asignacion.id)
@@ -315,6 +326,7 @@ def indicadores():
         porcentaje_terceros=porcentaje_terceros,
         dias_lluvia=dias_lluvia,
         dias_sin_lluvia=dias_sin_lluvia,
+        viajes_chofer=viajes_chofer,
         terceros_por_empresa=viajes_terceros_empresa
     )
 
@@ -356,6 +368,16 @@ def exportar_indicadores(mes, anio):
     porcentaje_lluvia = round((dias_lluvia / total_dias) * 100, 2) if total_dias > 0 else 0
     porcentaje_sin_lluvia = round((dias_sin_lluvia / total_dias) * 100, 2) if total_dias > 0 else 0
 
+    # viajes por chofer
+    viajes_chofer = db.session.query(
+        Asignacion.chofer,
+        db.func.count(Asignacion.id)
+    ).filter(
+        extract('month', Asignacion.fecha) == mes,
+        extract('year', Asignacion.fecha) == anio,
+        Asignacion.es_tercero == False
+    ).group_by(Asignacion.chofer).all()
+
     viajes_terceros_empresa = db.session.query(
         Asignacion.empresa_tercero,
         db.func.count(Asignacion.id)
@@ -381,6 +403,11 @@ def exportar_indicadores(mes, anio):
     ws.append(["Total días", total_dias, "100%"])
     ws.append([])
 
+    ws.append(["Chofer", "Cantidad de viajes"])
+    for chofer, cantidad in viajes_chofer:
+        ws.append([chofer, cantidad])
+
+    ws.append([])
     ws.append(["Empresa de terceros", "Cantidad de viajes"])
     for empresa, cantidad in viajes_terceros_empresa:
         ws.append([empresa, cantidad])

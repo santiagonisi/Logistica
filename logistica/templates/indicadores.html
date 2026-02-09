@@ -56,6 +56,14 @@
         </div>
     </div>
 
+    <!-- Viajes por chofer -->
+    <div class="card p-3 shadow-sm mb-4">
+        <h5>Viajes Propios por Chofer</h5>
+        <div style="overflow-x:auto;">
+            <canvas id="choferChart" style="min-width:300px; max-height:400px;"></canvas>
+        </div>
+    </div>
+
     <!-- Viajes por empresa de terceros -->
     <div class="card p-3 shadow-sm mb-4">
         <h5>Viajes de Terceros por Empresa</h5>
@@ -143,6 +151,34 @@ document.addEventListener("DOMContentLoaded", function() {
                         }
                     }
                 }
+            }
+        });
+    }
+
+    // Datos viajes por chofer
+    var viajesChofer = {{ viajes_chofer | tojson }};
+    var labelsChofer = viajesChofer.map(v => v[0]);
+    var dataChofer = viajesChofer.map(v => v[1]);
+    var ctxBar = document.getElementById('choferChart').getContext('2d');
+
+    if (dataChofer.length === 0) {
+        new Chart(ctxBar, {
+            type: 'bar',
+            data: { labels: ['Sin datos'], datasets: [{ data: [0], backgroundColor: '#d1d3e2' }] },
+            options: {
+                plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                scales: { y: { beginAtZero: true }, x: { ticks: { autoSkip: false } } }
+            }
+        });
+    } else {
+        new Chart(ctxBar, {
+            type: 'bar',
+            data: { labels: labelsChofer, datasets: [{ label: 'Cantidad de viajes propios', data: dataChofer, backgroundColor: '#4e73df' }] },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false }, tooltip: { enabled: true } },
+                scales: { y: { beginAtZero: true }, x: { ticks: { autoSkip: false, maxRotation: 90, minRotation: 0 } } }
             }
         });
     }
