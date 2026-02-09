@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Entornos virtuales
+.venv/
+venv/
+ENV/
+env/
+
+# Base de datos (NO subir al repo)
+*.db
+*.db-journal
+*.backup_*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Archivos temporales
+*.log
+*.tmp
+instance/
+
+# SQLite tools
+sqlite-tools*/
+sqlite*.exe
+sqldiff.exe
+
+# Archivos ZIP de deploy
+*_deploy_*.zip
