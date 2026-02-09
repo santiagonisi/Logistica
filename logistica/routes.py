@@ -132,6 +132,7 @@ def agregar_comitente():
 @main.route('/asignaciones/agregar', methods=['POST'])
 def agregar_asignacion():
     es_tercero = bool(request.form.get('es_tercero'))
+    lluvia = bool(request.form.get('lluvia'))
     nueva = Asignacion(
         cliente_id=request.form['cliente_id'],
         vehiculo_id=None if es_tercero else request.form['vehiculo_id'],
@@ -140,6 +141,7 @@ def agregar_asignacion():
         equipo_tercero=request.form.get('equipo_tercero') if es_tercero else None,
         empresa_tercero=request.form.get('empresa_tercero') if es_tercero else None,
         es_tercero=es_tercero,
+        lluvia=lluvia,
         chofer=request.form['chofer'],
         material=request.form['material'],
         fecha=datetime.strptime(request.form['fecha'], '%Y-%m-%d'),
@@ -162,6 +164,7 @@ def editar_asignacion(id):
         a.fecha = datetime.strptime(request.form['fecha'], "%Y-%m-%d").date()
         a.hora_inicio = datetime.strptime(request.form['hora_inicio'], "%H:%M").time()
         a.hora_fin = datetime.strptime(request.form['hora_fin'], "%H:%M").time()
+        a.lluvia = bool(request.form.get('lluvia'))
         db.session.commit()
         flash('Asignación actualizada', 'success')
     except Exception as e:
@@ -275,17 +278,22 @@ def indicadores():
     porcentaje_propios = round((propios / total) * 100, 2) if total > 0 else 0
     porcentaje_terceros = round((terceros / total) * 100, 2) if total > 0 else 0
 
-    viajes_chofer_query = db.session.query(
-        Asignacion.chofer,
-        db.func.count(Asignacion.id)
+    dias_lluvia = db.session.query(
+        db.func.count(db.func.distinct(Asignacion.fecha))
     ).filter(
         extract('month', Asignacion.fecha) == mes,
         extract('year', Asignacion.fecha) == anio,
-        Asignacion.es_tercero == False
-    ).group_by(Asignacion.chofer).all()
-    viajes_chofer = [[row[0], row[1]] for row in viajes_chofer_query] if viajes_chofer_query else []
+        Asignacion.lluvia == True
+    ).scalar() or 0
 
-    # viajes por empresa de terceros
+    dias_sin_lluvia = db.session.query(
+        db.func.count(db.func.distinct(Asignacion.fecha))
+    ).filter(
+        extract('month', Asignacion.fecha) == mes,
+        extract('year', Asignacion.fecha) == anio,
+        Asignacion.lluvia == False
+    ).scalar() or 0
+
     viajes_terceros_empresa_query = db.session.query(
         Asignacion.empresa_tercero,
         db.func.count(Asignacion.id)
@@ -305,7 +313,8 @@ def indicadores():
         terceros=terceros,
         porcentaje_propios=porcentaje_propios,
         porcentaje_terceros=porcentaje_terceros,
-        viajes_chofer=viajes_chofer,
+        dias_lluvia=dias_lluvia,
+        dias_sin_lluvia=dias_sin_lluvia,
         terceros_por_empresa=viajes_terceros_empresa
     )
 
@@ -327,16 +336,26 @@ def exportar_indicadores(mes, anio):
     porcentaje_propios = round((propios / total) * 100, 2) if total > 0 else 0
     porcentaje_terceros = round((terceros / total) * 100, 2) if total > 0 else 0
 
-    viajes_chofer = db.session.query(
-        Asignacion.chofer,
-        db.func.count(Asignacion.id)
+    dias_lluvia = db.session.query(
+        db.func.count(db.func.distinct(Asignacion.fecha))
     ).filter(
         extract('month', Asignacion.fecha) == mes,
         extract('year', Asignacion.fecha) == anio,
-        Asignacion.es_tercero == False
-    ).group_by(Asignacion.chofer).all()
+        Asignacion.lluvia == True
+    ).scalar() or 0
 
-    # viajes por empresa de terceros
+    dias_sin_lluvia = db.session.query(
+        db.func.count(db.func.distinct(Asignacion.fecha))
+    ).filter(
+        extract('month', Asignacion.fecha) == mes,
+        extract('year', Asignacion.fecha) == anio,
+        Asignacion.lluvia == False
+    ).scalar() or 0
+
+    total_dias = dias_lluvia + dias_sin_lluvia
+    porcentaje_lluvia = round((dias_lluvia / total_dias) * 100, 2) if total_dias > 0 else 0
+    porcentaje_sin_lluvia = round((dias_sin_lluvia / total_dias) * 100, 2) if total_dias > 0 else 0
+
     viajes_terceros_empresa = db.session.query(
         Asignacion.empresa_tercero,
         db.func.count(Asignacion.id)
@@ -357,11 +376,11 @@ def exportar_indicadores(mes, anio):
     ws.append(["Total", total, "100%"])
     ws.append([])
 
-    ws.append(["Chofer", "Cantidad de viajes"])
-    for chofer, cantidad in viajes_chofer:
-        ws.append([chofer, cantidad])
-
+    ws.append(["Días de lluvia", dias_lluvia, f"{porcentaje_lluvia}%"])
+    ws.append(["Días sin lluvia", dias_sin_lluvia, f"{porcentaje_sin_lluvia}%"])
+    ws.append(["Total días", total_dias, "100%"])
     ws.append([])
+
     ws.append(["Empresa de terceros", "Cantidad de viajes"])
     for empresa, cantidad in viajes_terceros_empresa:
         ws.append([empresa, cantidad])

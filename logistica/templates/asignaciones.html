@@ -68,6 +68,10 @@
     <label class="form-label">¿Vehículo/equipo de terceros?</label>
     <input type="checkbox" name="es_tercero" id="es_tercero" onchange="toggleTerceroFields()">
   </div>
+  <div class="col-md-3">
+    <label class="form-label">¿Hubo lluvia?</label>
+    <input type="checkbox" name="lluvia" id="lluvia">
+  </div>
   <div id="terceroFields" class="row g-3" style="display:none;">
     <div class="col-md-3">
       <label class="form-label">Nombre de Empresa</label>
@@ -257,6 +261,10 @@
                           <div class="col-md-2">
                             <label class="form-label">Fin</label>
                             <input type="time" name="hora_fin" class="form-control" value="{{ a.hora_fin.strftime('%H:%M') }}" required>
+                          </div>
+                          <div class="col-md-3">
+                            <label class="form-label">¿Hubo lluvia?</label>
+                            <input type="checkbox" name="lluvia" {% if a.lluvia %}checked{% endif %}>
                           </div>
                         </div>
                       </div>

@@ -47,6 +47,7 @@ class Asignacion(db.Model):
     equipo_tercero = db.Column(db.String(100), nullable=True)
     empresa_tercero = db.Column(db.String(100), nullable=True)
     es_tercero = db.Column(db.Boolean, default=False)
+    lluvia = db.Column(db.Boolean, default=False)
 
     cliente = db.relationship('Cliente', backref=db.backref('asignaciones', lazy=True))
     vehiculo = db.relationship('Vehiculo', foreign_keys=[vehiculo_id])

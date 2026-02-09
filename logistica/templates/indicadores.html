@@ -48,11 +48,11 @@
         </div>
     </div>
 
-    <!-- Viajes por chofer -->
+    <!-- Días de lluvia -->
     <div class="card p-3 shadow-sm mb-4">
-        <h5>Viajes Propios por Chofer</h5>
-        <div style="overflow-x:auto;">
-            <canvas id="choferChart" style="min-width:300px; max-height:400px;"></canvas>
+        <h5>Días de Lluvia (Mes {{ mes }}, Año {{ anio }})</h5>
+        <div class="d-flex justify-content-center">
+            <canvas id="lluviaChart" style="max-width:400px; max-height:400px;"></canvas>
         </div>
     </div>
 
@@ -101,29 +101,48 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     // Datos viajes por chofer
-    var viajesChofer = {{ viajes_chofer | tojson }};
-    var labelsChofer = viajesChofer.map(v => v[0]);
-    var dataChofer = viajesChofer.map(v => v[1]);
-    var ctxBar = document.getElementById('choferChart').getContext('2d');
+    var diasLluvia = {{ dias_lluvia | int }};
+    var diasSinLluvia = {{ dias_sin_lluvia | int }};
+    var totalDias = diasLluvia + diasSinLluvia;
 
-    if (dataChofer.length === 0) {
-        new Chart(ctxBar, {
-            type: 'bar',
-            data: { labels: ['Sin datos'], datasets: [{ data: [0], backgroundColor: '#d1d3e2' }] },
-            options: {
-                plugins: { legend: { display: false }, tooltip: { enabled: false } },
-                scales: { y: { beginAtZero: true }, x: { ticks: { autoSkip: false } } }
-            }
+    var ctxLluvia = document.getElementById('lluviaChart').getContext('2d');
+    if (totalDias === 0) {
+        new Chart(ctxLluvia, {
+            type: 'doughnut',
+            data: { labels: ['Sin datos'], datasets: [{ data: [1], backgroundColor: ['#d1d3e2'] }] },
+            options: { plugins: { legend: { display: false }, tooltip: { enabled: false } } }
         });
     } else {
-        new Chart(ctxBar, {
-            type: 'bar',
-            data: { labels: labelsChofer, datasets: [{ label: 'Cantidad de viajes propios', data: dataChofer, backgroundColor: '#4e73df' }] },
+        new Chart(ctxLluvia, {
+            type: 'doughnut',
+            data: {
+                labels: [
+                    `Días con lluvia (${diasLluvia})`,
+                    `Días sin lluvia (${diasSinLluvia})`
+                ],
+                datasets: [{
+                    data: [diasLluvia, diasSinLluvia],
+                    backgroundColor: ['#5a9bd5', '#ffc966'],
+                    borderColor: '#fff',
+                    borderWidth: 2,
+                    hoverOffset: 6
+                }]
+            },
             options: {
                 responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false }, tooltip: { enabled: true } },
-                scales: { y: { beginAtZero: true }, x: { ticks: { autoSkip: false, maxRotation: 90, minRotation: 0 } } }
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { position: 'bottom', labels: { font: { size: 14 }, boxWidth: 20, padding: 15 } },
+                    tooltip: { 
+                        callbacks: { 
+                            label: function(context) {
+                                let label = context.label || '';
+                                let porcentaje = totalDias > 0 ? ((context.parsed / totalDias) * 100).toFixed(1) : 0;
+                                return `${label} (${porcentaje}%)`;
+                            }
+                        }
+                    }
+                }
             }
         });
     }

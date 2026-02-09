@@ -8,10 +8,8 @@ from logistica.models import db, Comitente
 def inicializar_comitentes():
     app = create_app()
     with app.app_context():
-        # Crear tablas si no existen
         db.create_all()
         
-        # Lista de comitentes predeterminados
         comitentes_default = [
             "DVBA",
             "DNV",
@@ -32,12 +30,10 @@ def inicializar_comitentes():
             "Autovía Construcciones y Servicios SA"
         ]
         
-        # Agregar comitentes si no existen
         agregados = 0
         existentes = 0
         
         for nombre in comitentes_default:
-            # Verificar si ya existe
             existe = Comitente.query.filter_by(nombre=nombre).first()
             if not existe:
                 nuevo = Comitente(nombre=nombre, estado="Activo")
@@ -48,7 +44,6 @@ def inicializar_comitentes():
                 existentes += 1
                 print(f"• Ya existe: {nombre}")
         
-        # Guardar cambios
         db.session.commit()
         print(f"\n{'='*50}")
         print(f"Comitentes agregados: {agregados}")
