@@ -1,6 +1,3 @@
-"""
-Script para agregar el campo lluvia a la tabla Asignacion
-"""
 from logistica import create_app
 from logistica.models import db
 

@@ -1,7 +1,3 @@
-"""
-Script para inicializar la tabla de Comitentes con los valores predeterminados
-Ejecutar una sola vez después de agregar el modelo Comitente
-"""
 from logistica import create_app
 from logistica.models import db, Comitente
 

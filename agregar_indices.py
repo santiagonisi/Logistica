@@ -1,7 +1,3 @@
-"""
-Script para agregar índices a la base de datos SQLite
-Esto mejora significativamente la velocidad de búsquedas y filtrados
-"""
 from logistica import create_app
 from logistica.models import db
 
