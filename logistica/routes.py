@@ -4,6 +4,7 @@ from datetime import datetime
 from openpyxl import Workbook
 from openpyxl.styles import PatternFill
 from sqlalchemy import extract
+from sqlalchemy.orm import selectinload
 import io
 
 main = Blueprint('main', __name__)
@@ -21,16 +22,37 @@ def paginar_query(query, page, per_page=10):
 
 @main.route('/')
 def index():
-    clientes = Cliente.query.filter_by(estado="Activo").order_by(Cliente.nombre).all()
-    vehiculos = Vehiculo.query.order_by(Vehiculo.codigo).all()
-    asignaciones = Asignacion.query.order_by(
+    page = request.args.get('page', 1, type=int)
+    per_page = 50
+    
+    asignaciones_query = Asignacion.query.options(
+        selectinload(Asignacion.cliente),
+        selectinload(Asignacion.vehiculo),
+        selectinload(Asignacion.equipo)
+    ).order_by(
         Asignacion.fecha.desc(), Asignacion.hora_inicio.desc()
-    ).all()
+    )
+    
+    total = asignaciones_query.count()
+    total_pages = max((total + per_page - 1) // per_page, 1)
+    if page < 1:
+        page = 1
+    elif page > total_pages:
+        page = total_pages
+    
+    asignaciones = asignaciones_query.offset((page - 1) * per_page).limit(per_page).all()
+    
+    clientes = Cliente.query.filter_by(estado="Activo").order_by(Cliente.nombre).limit(100).all()
+    vehiculos = Vehiculo.query.order_by(Vehiculo.codigo).limit(100).all()
+    
     return render_template(
         'asignaciones.html',
         clientes=clientes,
         vehiculos=vehiculos,
-        asignaciones=asignaciones
+        asignaciones=asignaciones,
+        page=page,
+        total_pages=total_pages,
+        total=total
     )
 
 
@@ -186,7 +208,11 @@ def eliminar_asignacion(id):
 
 @main.route('/asignaciones/exportar')
 def exportar_asignaciones():
-    asignaciones = Asignacion.query.order_by(Asignacion.fecha.desc()).all()
+    asignaciones = Asignacion.query.options(
+        selectinload(Asignacion.cliente),
+        selectinload(Asignacion.vehiculo),
+        selectinload(Asignacion.equipo)
+    ).order_by(Asignacion.fecha.desc()).limit(5000).all()
     wb = Workbook()
     ws = wb.active
     ws.title = "Asignaciones"
@@ -229,19 +255,27 @@ def exportar_asignaciones():
 def asignaciones():
     page = request.args.get('page', 1, type=int)
     per_page = 10
-    asignaciones_query = Asignacion.query.order_by(Asignacion.fecha.desc())
+    
+    asignaciones_query = Asignacion.query.options(
+        selectinload(Asignacion.cliente),
+        selectinload(Asignacion.vehiculo),
+        selectinload(Asignacion.equipo)
+    ).order_by(Asignacion.fecha.desc())
+    
     total = asignaciones_query.count()
     total_pages = max((total + per_page - 1) // per_page, 1)
     asignaciones = asignaciones_query.offset((page - 1) * per_page).limit(per_page).all()
-    clientes = Cliente.query.all()
-    vehiculos = Vehiculo.query.all()
+    
+    clientes = Cliente.query.filter_by(estado="Activo").order_by(Cliente.nombre).all()
+    vehiculos = Vehiculo.query.order_by(Vehiculo.codigo).all()
     return render_template(
         'asignaciones.html',
         asignaciones=asignaciones,
         clientes=clientes,
         vehiculos=vehiculos,
         page=page,
-        total_pages=total_pages
+        total_pages=total_pages,
+        total=total
     )
 
 @main.route('/asignaciones/observaciones/<int:id>', methods=['POST'])
@@ -294,7 +328,6 @@ def indicadores():
         Asignacion.lluvia == False
     ).scalar() or 0
 
-    # viajes por chofer
     viajes_chofer_query = db.session.query(
         Asignacion.chofer,
         db.func.count(Asignacion.id)
@@ -368,7 +401,6 @@ def exportar_indicadores(mes, anio):
     porcentaje_lluvia = round((dias_lluvia / total_dias) * 100, 2) if total_dias > 0 else 0
     porcentaje_sin_lluvia = round((dias_sin_lluvia / total_dias) * 100, 2) if total_dias > 0 else 0
 
-    # viajes por chofer
     viajes_chofer = db.session.query(
         Asignacion.chofer,
         db.func.count(Asignacion.id)

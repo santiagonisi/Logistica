@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import event
 
 db = SQLAlchemy()
 
@@ -49,6 +50,6 @@ class Asignacion(db.Model):
     es_tercero = db.Column(db.Boolean, default=False)
     lluvia = db.Column(db.Boolean, default=False)
 
-    cliente = db.relationship('Cliente', backref=db.backref('asignaciones', lazy=True))
+    cliente = db.relationship('Cliente', backref=db.backref('asignaciones', lazy='select'))
     vehiculo = db.relationship('Vehiculo', foreign_keys=[vehiculo_id])
     equipo = db.relationship('Vehiculo', foreign_keys=[equipo_id])
